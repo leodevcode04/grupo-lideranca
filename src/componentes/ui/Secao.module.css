@@ -2,6 +2,13 @@
   padding-block: var(--e-secao);
 }
 
+/* Folga do header fixo: só a primeira seção de cada página precisa dela — é
+   quem decide se quer sangrar sob o header (não é o caso de Secao) ou não.
+   Ver passo 8 da Tarefa 5 no plano. */
+.secao:first-child {
+  padding-top: calc(var(--e-secao) + var(--altura-cabecalho));
+}
+
 .noite {
   background: var(--azul-noite);
 }

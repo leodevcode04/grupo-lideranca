@@ -240,6 +240,12 @@ reporte como BLOCKED em vez de tentar contornar.
   token, reporte em vez de inventar um valor solto. Isso vale mesmo quando o texto de uma
   tarefa escreve o valor por extenso: "padding de 1rem 2rem" significa
   `var(--e-2) var(--e-4)`.
+- Dois CSS Modules diferentes numa mesma classe do mesmo elemento empatam em
+  especificidade, e o desempate vira a ordem de injeção do Vite, que segue o grafo de
+  imports — não é contrato. Nunca conte com isso: se um módulo de página precisa vencer
+  um de layout, aumente a especificidade de propósito.
+- Anime `transform` e `opacity`, não propriedades de layout (`right`, `width`, `top`).
+  Sublinhado que cresce é `transform: scaleX()` com `transform-origin: left`.
 - `--transicao` empacota duração e curva. Quem precisar de outra duração usa
   `--curva` sozinha: `transition: opacity 700ms var(--curva)`.
 - O bloco `prefers-reduced-motion` acima **não alcança o Framer Motion**, que anima por
@@ -888,7 +894,7 @@ git commit -m "Adiciona módulos de conteúdo"
 
 ---
 
-### Task 5: Header, MenuMobile, Footer e WhatsApp flutuante
+### Task 5: Header, MenuMobile, Footer e WhatsApp flutuante ✅ (revisada)
 
 **Files:**
 - Create: `src/componentes/layout/Header.jsx` + `.module.css`
@@ -954,7 +960,144 @@ Navegue entre as rotas: o header deve mudar ao rolar, o item ativo acender, e o 
 mobile abrir e fechar em viewport de 375px. Confira que `Escape` fecha o drawer e que a
 página não rola por trás dele.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 8: Correções apontadas na revisão**
+
+**8.1 — A folga do header fixo estava errada em número e em mecanismo.**
+
+O token valia `6rem` (96px), mas o header mede **116px** no desktop e **109px** no mobile
+no estado não rolado. A faixa sobreposta não é só visual: o `<header>` é `position: fixed`
+e continua interceptando cliques mesmo transparente, então o topo de toda página fica
+morto ao toque. Nos stubs isso passa despercebido só porque o `<h1>` começa logo abaixo.
+
+Pior que o número é o mecanismo. `padding-top` no `.pagina` (o wrapper de página) briga
+com o hero da Tarefa 6 em duas frentes:
+
+- o `background-image` do hero passaria a começar **abaixo** do header, deixando uma
+  faixa chapada de `--azul-noite` no topo em vez da foto correndo sob o vidro — o
+  oposto do que a direção visual pede;
+- `min-height: 100svh` no hero dentro de um wrapper com 96px de padding dá
+  `96px + 100svh` de altura, ou seja, barra de rolagem vertical garantida na home. O
+  critério de aceite da Tarefa 6 é justamente "o hero preenche a tela sem barra de
+  rolagem horizontal" — e a vertical apareceria de graça.
+
+Correção, nesta ordem:
+
+1. Torne o token derivado, para não desincronizar quando o padding do header mudar:
+
+```css
+/* Altura do header no estado não rolado (o maior dos dois).
+   Derivado do padding de .linha + a altura do CTA, para não desincronizar
+   quando um dos dois mudar. Conferir se .linha ou o Botao mudarem de padding. */
+--altura-cabecalho: calc(var(--e-4) * 2 + 3.25rem);
+```
+
+2. **Remova o `padding-top` do `.pagina`** em `Transicao.module.css`. A folga passa a ser
+   responsabilidade da primeira seção de cada página, que é quem sabe se quer sangrar sob
+   o header ou não.
+
+3. Em `Secao.module.css`, dê a folga só à primeira seção da página:
+
+```css
+.secao:first-child {
+  padding-top: calc(var(--e-secao) + var(--altura-cabecalho));
+}
+```
+
+Isso cobre de uma vez as páginas das Tarefas 12 e 13, que começam com `Secao` ou
+`Cabecalho`. O hero da Tarefa 6 resolve por conta própria (ver 8.2).
+
+4. Acrescente `scroll-margin-top: var(--altura-cabecalho)` ao `#conteudo` no
+   `Transicao.module.css`. Sem isso o salto do skip link estaciona o `<main>` em y=0,
+   atrás do header — o link funciona e parece não funcionar.
+
+**8.2 — Regra para as Tarefas 6, 12 e 13.** Seção que sangra sob o header (hero com foto)
+usa `min-height: 100svh` com `padding-top: var(--altura-cabecalho)` e `box-sizing:
+border-box` — que já é global. Assim a foto e os gradientes ocupam a tela inteira,
+inclusive sob o header translúcido, e a altura continua sendo exatamente uma tela.
+Seção comum herda a folga do `.secao:first-child` acima e não faz nada.
+
+Padronize em `svh`, não `vh`: `.pagina` usa `min-height: 100vh` e o hero usaria `100svh`,
+e misturar os dois faz o piso da página e o do hero divergirem quando a barra de
+endereço do mobile recolhe.
+
+**8.3 — `navegacao` sai do `Header.jsx` para `src/dados/navegacao.js`.** O `Footer`
+importa o array do `Header`, o que contradiz a tabela de arquitetura e a própria decisão
+3.4 (que moveu `redes` para lista justamente para rótulo ser dado, não componente).
+
+O custo concreto não é estético: `@vitejs/plugin-react` só preserva estado no Fast
+Refresh de módulos cujos exports são todos componentes. Com o `Header.jsx` exportando
+componente **e** array, toda edição nele recarrega o módulo inteiro em vez de trocar a
+quente — perdendo o estado de scroll e o drawer aberto, em nove tarefas de iteração no
+navegador.
+
+**8.4 — `IconeRede` sai do `Footer.jsx` para `src/componentes/ui/IconeRede.jsx`.** A
+Tarefa 13 renderiza `contato.redes` na página de Contato. Deixando onde está, ela vai ou
+duplicar os SVGs ou importar do `Footer.jsx`, repetindo 8.3 uma camada abaixo. É peça sem
+domínio; é de `ui/` que se trata.
+
+**8.5 — `fecharMenu` precisa de `useCallback`.** Ele é recriado a cada render do `Header`
+e está no array de dependências do efeito do `MenuMobile`. A cada re-execução o efeito
+chama `botaoFecharRef.current?.focus()` incondicionalmente: quem tiver navegado por
+teclado até "Unidades" é puxado de volta ao X. Em produção é quase inalcançável (com o
+scroll travado, `rolado` congela), mas o `StrictMode` já dispara isso em
+desenvolvimento, e qualquer re-render futuro do `Header` com o drawer aberto o torna
+real.
+
+```jsx
+const fecharMenu = useCallback(() => {
+  setMenuAberto(false)
+  botaoHamburguerRef.current?.focus()
+}, [])
+```
+
+A ref é estável, então `[]` é honesto.
+
+Aproveite e comente, no efeito do `MenuMobile`, que a ordem limpeza-antes-de-setup é o
+que mantém o valor salvo de `overflow` correto sob o `StrictMode`. É load-bearing e
+invisível.
+
+**8.6 — A janela dos ~300ms da animação de saída do drawer.** `fecharMenu` devolve o foco
+ao hambúrguer enquanto o `AnimatePresence` ainda anima o drawer para fora. Nessa janela o
+drawer continua `position: fixed; inset: 0` e opaco ao hit-test, então o primeiro clique
+depois do Escape é engolido; um Tab cai dentro do drawer que está saindo e, ~200ms
+depois, o foco despenca no `<body>`; e o `aria-modal="true"` ainda presente manda a
+tecnologia assistiva ignorar justamente o botão onde o foco está.
+
+```jsx
+aria-modal={aberto ? 'true' : undefined}
+exit={{ opacity: 0, pointerEvents: 'none' }}
+```
+
+O `aria-modal` condicional é o de maior retorno. Para fechar também o caso do Tab, marque
+o painel como `inert` quando `!aberto`.
+
+**8.7 — Fechar o drawer ao cruzar o breakpoint e ao trocar de rota.** Passando de 900px
+com ele aberto, o hambúrguer some (`display: none`) e o `focus()` vira no-op, deixando o
+foco no `<body>`. Um efeito que fecha o drawer nesses dois eventos resolve isso e também
+o "voltar do navegador deixa o drawer aberto".
+
+**8.8 — Ajustes menores.**
+
+- `Footer.module.css`: `.iconeRede` usa `2.5rem` literal onde existe `var(--e-5)`.
+- `WhatsAppFlutuante.jsx`: renomear `href` de escopo de módulo para `HREF_WHATSAPP`,
+  acompanhando o `LIMIAR_ROLAGEM` logo acima.
+- `Header.jsx`: `aria-label` do hambúrguer é fixo em "Abrir menu" enquanto o
+  `aria-expanded` alterna — anuncia "Abrir menu, expandido". Torne-o
+  `menuAberto ? 'Fechar menu' : 'Abrir menu'`.
+- `Header.module.css`: `.cabecalho` lista `padding` no `transition` mas não tem padding —
+  o padding animado está no `.linha`. Declaração morta.
+- Sublinhados animados (`.link::after` no Header, `.texto::after` no `Botao`) animam
+  `right`, uma propriedade de layout, a cada quadro. Troque por
+  `transform: scaleX()` com `transform-origin: left` **agora**, antes de o padrão ser
+  copiado para as abas da Tarefa 12 e para os cards das Tarefas 6–8.
+
+**8.9 — Não "otimize" os listeners de scroll.** `Header` e `WhatsAppFlutuante` têm cada um
+o seu, e ambos fazem `setState` de um **booleano**: o React descarta o update quando o
+valor não muda, então só há re-render na travessia do limiar, não a cada quadro. Está
+correto como está. Registrado aqui para que a varredura da Tarefa 14 não invente uma
+refatoração.
+
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A
@@ -972,7 +1115,11 @@ git commit -m "Adiciona header, menu mobile, footer e botão de WhatsApp"
 
 - [ ] **Step 1: Implementar o `Hero`**
 
-Ocupa `min-height: 100svh`. Camadas, de trás para frente: foto da Unsplash em
+Ocupa `min-height: 100svh` **com `padding-top: var(--altura-cabecalho)`** — ver Tarefa 5,
+passo 8.2. O `.pagina` não dá mais folga nenhuma, justamente para a foto e os gradientes
+do hero correrem por baixo do header translúcido em vez de começarem abaixo dele. Como o
+`box-sizing: border-box` é global, a folga entra dentro da tela e a altura continua sendo
+exatamente uma. Camadas, de trás para frente: foto da Unsplash em
 `background-image` com `filter: saturate(.5)`; um gradiente de leitura
 (`linear-gradient` do `--azul-noite` sólido à esquerda para transparente à direita, mais
 um de baixo para cima); e o grão SVG em `opacity: .04`.

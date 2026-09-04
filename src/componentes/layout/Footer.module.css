@@ -74,8 +74,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--e-5);
+  height: var(--e-5);
   border: 1px solid var(--azul-borda);
   border-radius: var(--raio);
   color: var(--gelo-suave);

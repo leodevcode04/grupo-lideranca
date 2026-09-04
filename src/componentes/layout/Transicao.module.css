@@ -1,8 +1,19 @@
 .pagina {
-  min-height: 100vh;
+  min-height: 100svh;
   outline: none;
-  /* Compensa o Header fixo para toda página — ver comentário em tokens.css
-     sobre --altura-cabecalho. Fica aqui, e não em cada página, para sobreviver
-     à reescrita das páginas stub nas Tarefas 6–13. */
-  padding-top: var(--altura-cabecalho);
+  /* A folga do header fixo NÃO mora aqui — um padding-top no wrapper de
+     página soma com min-height e força barra de rolagem vertical, e faria o
+     hero da Tarefa 6 começar abaixo do header em vez de sangrar sob o vidro
+     translúcido. Quem dá a folga é a primeira seção de cada página
+     (.secao:first-child em Secao.module.css) ou o próprio hero full-bleed
+     (ver tokens.css e o passo 8 da Tarefa 5 no plano). */
+
+  /* Sem isso o salto do skip link estaciona o <main> atrás do header fixo —
+     o link "funciona" tecnicamente mas o conteúdo fica escondido. Vive aqui
+     (na classe), e não num seletor `#conteudo`, porque o CSS Modules deste
+     projeto escopa (hashifica) seletores de id do mesmo jeito que classes —
+     um `#conteudo` neste arquivo viraria `#_conteudo_xxxxx_1` no CSS
+     compilado e nunca bateria com o `id="conteudo"` de verdade escrito em
+     Transicao.jsx, mesmo os dois estando no mesmo elemento. */
+  scroll-margin-top: var(--altura-cabecalho);
 }

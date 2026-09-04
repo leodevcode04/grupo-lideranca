@@ -48,11 +48,13 @@
   content: '';
   position: absolute;
   left: 0;
-  right: 100%;
+  right: 0;
   bottom: -2px;
   height: 1px;
   background: var(--dourado);
-  transition: right var(--transicao);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transicao);
 }
 
 .texto:hover {
@@ -60,7 +62,7 @@
 }
 
 .texto:hover::after {
-  right: 0;
+  transform: scaleX(1);
 }
 
 .botao:disabled {
@@ -82,5 +84,5 @@
 }
 
 .texto:disabled::after {
-  right: 100%;
+  transform: scaleX(0);
 }

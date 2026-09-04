@@ -12,10 +12,28 @@ export default function MenuMobile({ aberto, aoFechar, navegacao }) {
   const painelRef = useRef(null)
   const botaoFecharRef = useRef(null)
 
+  // O AnimatePresence mantém o <motion.div> montado durante os ~300ms de saída,
+  // com as props (inclusive aria-modal) congeladas no valor de quando `aberto`
+  // ainda era true — então marcar o painel como inert aqui, via ref e não via
+  // prop declarativa, é o que realmente desliga o hit-test e tira o painel da
+  // árvore de acessibilidade assim que `aberto` vira false, sem esperar o fim
+  // da animação.
+  useEffect(() => {
+    if (painelRef.current) {
+      painelRef.current.inert = !aberto
+    }
+  }, [aberto])
+
   // Enquanto aberto: trava o scroll da página atrás do drawer, move o foco
   // para dentro dele e restaura tudo no cleanup — inclusive quando o
   // componente fecha por qualquer via (item, X ou Escape), já que todas
   // passam por `aoFechar` e mudam `aberto` para false.
+  //
+  // A ordem limpeza-antes-de-setup (o cleanup do efeito anterior roda antes
+  // do corpo deste) é o que mantém `overflowOriginal` correto sob o
+  // StrictMode: sem ela, a dupla invocação do efeito em desenvolvimento
+  // capturaria "hidden" (já setado pela primeira invocação) como o valor
+  // "original" a restaurar, em vez do valor de antes do drawer abrir.
   useEffect(() => {
     if (!aberto) return
 
@@ -67,11 +85,11 @@ export default function MenuMobile({ aberto, aoFechar, navegacao }) {
           ref={painelRef}
           className={estilos.drawer}
           role="dialog"
-          aria-modal="true"
+          aria-modal={aberto ? 'true' : undefined}
           aria-label="Menu de navegação"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, pointerEvents: 'none' }}
           transition={{ duration: semMovimento ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className={estilos.topo}>

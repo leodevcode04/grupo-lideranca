@@ -24,7 +24,7 @@
   z-index: var(--z-cabecalho);
   background: transparent;
   border-bottom: 1px solid transparent;
-  transition: background-color var(--transicao), border-color var(--transicao), padding var(--transicao);
+  transition: background-color var(--transicao), border-color var(--transicao);
 }
 
 .rolado {
@@ -88,11 +88,13 @@
   content: '';
   position: absolute;
   left: 0;
-  right: 100%;
+  right: 0;
   bottom: 0;
   height: 2px;
   background: var(--dourado);
-  transition: right var(--transicao);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transicao);
 }
 
 .link:hover {
@@ -104,7 +106,7 @@
 }
 
 .linkAtivo::after {
-  right: 0;
+  transform: scaleX(1);
 }
 
 .cta {

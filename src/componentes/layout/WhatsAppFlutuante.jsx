@@ -5,7 +5,7 @@ import estilos from './WhatsAppFlutuante.module.css'
 
 const LIMIAR_ROLAGEM = 400
 
-const href = `https://wa.me/${contato.whatsapp}?text=${encodeURIComponent(contato.mensagemWhatsApp)}`
+const HREF_WHATSAPP = `https://wa.me/${contato.whatsapp}?text=${encodeURIComponent(contato.mensagemWhatsApp)}`
 
 export default function WhatsAppFlutuante() {
   const [visivel, setVisivel] = useState(false)
@@ -24,7 +24,7 @@ export default function WhatsAppFlutuante() {
     <AnimatePresence>
       {visivel && (
         <motion.a
-          href={href}
+          href={HREF_WHATSAPP}
           target="_blank"
           rel="noreferrer"
           aria-label="Falar no WhatsApp"

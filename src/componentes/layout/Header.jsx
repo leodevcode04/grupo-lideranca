@@ -1,18 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import Botao from '../ui/Botao.jsx'
 import MenuMobile from './MenuMobile.jsx'
+import { navegacao } from '../../dados/navegacao.js'
 import estilos from './Header.module.css'
-
-// Fonte única de navegação institucional: o Footer (Tarefa 5) reimporta este
-// array em vez de duplicá-lo.
-export const navegacao = [
-  { rotulo: 'Quem somos', para: '/quem-somos' },
-  { rotulo: 'Benefícios', para: '/beneficios' },
-  { rotulo: 'Unidades', para: '/unidades' },
-  { rotulo: 'Blog', para: '/blog' },
-  { rotulo: 'Contato', para: '/contato' },
-]
 
 const LIMIAR_ROLAGEM = 60
 
@@ -20,6 +11,7 @@ export default function Header() {
   const [rolado, setRolado] = useState(false)
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoHamburguerRef = useRef(null)
+  const { pathname } = useLocation()
 
   useEffect(() => {
     function aoRolar() {
@@ -30,10 +22,30 @@ export default function Header() {
     return () => window.removeEventListener('scroll', aoRolar)
   }, [])
 
-  function fecharMenu() {
+  // Fecha o drawer ao trocar de rota (inclusive "voltar" do navegador) e ao
+  // cruzar o breakpoint de 900px com ele aberto — acima desse valor o
+  // hambúrguer some (display: none) e devolver o foco a ele vira no-op,
+  // deixando o foco perdido no <body>.
+  useEffect(() => {
+    setMenuAberto(false)
+  }, [pathname])
+
+  useEffect(() => {
+    const consulta = window.matchMedia('(min-width: 901px)')
+    function aoCruzarBreakpoint(evento) {
+      if (evento.matches) setMenuAberto(false)
+    }
+    consulta.addEventListener('change', aoCruzarBreakpoint)
+    return () => consulta.removeEventListener('change', aoCruzarBreakpoint)
+  }, [])
+
+  // A ref é estável, então `[]` é honesto: recriar esta função a cada render
+  // do Header a re-executaria o efeito do MenuMobile (que a tem como
+  // dependência) e puxaria o foco de volta ao X incondicionalmente.
+  const fecharMenu = useCallback(() => {
     setMenuAberto(false)
     botaoHamburguerRef.current?.focus()
-  }
+  }, [])
 
   return (
     <>
@@ -71,7 +83,7 @@ export default function Header() {
             ref={botaoHamburguerRef}
             type="button"
             className={estilos.hamburguer}
-            aria-label="Abrir menu"
+            aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={menuAberto}
             aria-controls="menu-mobile"
             onClick={() => setMenuAberto(true)}

@@ -8,12 +8,23 @@ export default function Secao({
   subtitulo,
   fundo = 'noite',
   centralizado = false,
+  className,
   children,
+  ...resto
 }) {
   const temCabecalho = etiqueta || titulo || subtitulo
+  const idTitulo = id && titulo ? `${id}-titulo` : undefined
+
+  const classeBase = `${estilos.secao} ${estilos[fundo] ?? estilos.noite}`
+  const classeFinal = className ? `${classeBase} ${className}` : classeBase
 
   return (
-    <section id={id} className={`${estilos.secao} ${estilos[fundo] ?? estilos.noite}`}>
+    <section
+      id={id}
+      className={classeFinal}
+      aria-labelledby={idTitulo}
+      {...resto}
+    >
       <div className={`container ${estilos.container}`}>
         {temCabecalho && (
           <Revelar
@@ -26,7 +37,11 @@ export default function Secao({
                 {etiqueta}
               </p>
             )}
-            {titulo && <h2 className={estilos.titulo}>{titulo}</h2>}
+            {titulo && (
+              <h2 id={idTitulo} className={estilos.titulo}>
+                {titulo}
+              </h2>
+            )}
             {subtitulo && <p className={estilos.subtitulo}>{subtitulo}</p>}
           </Revelar>
         )}

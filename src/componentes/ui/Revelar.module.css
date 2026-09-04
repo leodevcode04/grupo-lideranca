@@ -1,8 +1,8 @@
 .revelar {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 700ms var(--curva),
+    transform 700ms var(--curva);
 }
 
 .visivel {

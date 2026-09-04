@@ -5,56 +5,40 @@ export default function Botao({
   variante = 'primario',
   para,
   href,
-  onClick,
   tipo,
   desabilitado = false,
+  className,
   children,
   ...resto
 }) {
-  const className = `${estilos.botao} ${estilos[variante] ?? estilos.primario}`
+  if (import.meta.env.DEV && !estilos[variante]) {
+    console.warn(`Botao: variante "${variante}" não existe — usando "primario".`)
+  }
 
-  // Precedência: para > href > onClick/tipo — link interno é o caso mais comum
-  // de CTA no site, então ganha quando mais de uma prop é passada por engano.
+  const classeBase = `${estilos.botao} ${estilos[variante] ?? estilos.primario}`
+  const classeFinal = className ? `${classeBase} ${className}` : classeBase
+
+  // Precedência: para > href > <button> — link interno é o caso mais comum de CTA
+  // no site, então ganha quando mais de uma prop é passada por engano. `onClick`
+  // não participa dessa escolha: cai em `...resto` e é repassado ao elemento que
+  // for renderizado, qualquer que seja.
   if (para) {
-    if (desabilitado) {
-      // Link/`<a>` não têm estado `disabled` nativo: renderiza um `<span>` com a
-      // aparência do botão desabilitado, focável e anunciado como tal, em vez de
-      // um link clicável que finge estar bloqueado.
-      return (
-        <span
-          className={`${className} ${estilos.desabilitado}`}
-          role="link"
-          aria-disabled="true"
-          tabIndex={0}
-          {...resto}
-        >
-          {children}
-        </span>
-      )
-    }
     return (
-      <Link to={para} className={className} {...resto}>
+      <Link to={para} className={classeFinal} {...resto}>
         {children}
       </Link>
     )
   }
 
   if (href) {
-    if (desabilitado) {
-      return (
-        <span
-          className={`${className} ${estilos.desabilitado}`}
-          role="link"
-          aria-disabled="true"
-          tabIndex={0}
-          {...resto}
-        >
-          {children}
-        </span>
-      )
-    }
+    const externo = /^https?:/i.test(href)
     return (
-      <a href={href} target="_blank" rel="noreferrer" className={className} {...resto}>
+      <a
+        href={href}
+        className={classeFinal}
+        {...(externo ? { target: '_blank', rel: 'noreferrer' } : {})}
+        {...resto}
+      >
         {children}
       </a>
     )
@@ -63,9 +47,8 @@ export default function Botao({
   return (
     <button
       type={tipo ?? 'button'}
-      onClick={onClick}
       disabled={desabilitado}
-      className={className}
+      className={classeFinal}
       {...resto}
     >
       {children}

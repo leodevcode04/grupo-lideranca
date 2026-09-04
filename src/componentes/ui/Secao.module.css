@@ -49,7 +49,7 @@
 
 .filete {
   display: inline-block;
-  width: 24px;
+  width: var(--e-3);
   height: 1px;
   background: var(--dourado);
 }

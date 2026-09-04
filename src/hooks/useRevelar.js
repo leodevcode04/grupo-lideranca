@@ -20,7 +20,7 @@ export function useRevelar({ margem = '0px 0px -12% 0px' } = {}) {
           observador.unobserve(el)
         }
       },
-      { threshold: 0.15, rootMargin: margem }
+      { threshold: 0, rootMargin: margem }
     )
     observador.observe(el)
     return () => observador.disconnect()

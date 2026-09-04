@@ -48,7 +48,8 @@
   --z-menu: 300;
 
   /* Movimento */
-  --transicao: 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  --curva: cubic-bezier(0.22, 1, 0.36, 1);
+  --transicao: 400ms var(--curva);
 }
 
 @media (prefers-reduced-motion: reduce) {

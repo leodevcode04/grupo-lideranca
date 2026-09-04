@@ -5,11 +5,12 @@ export default function Revelar({
   children,
   atraso = 0,
   as: Tag = 'div',
+  margem,
   className,
   style,
   ...resto
 }) {
-  const { ref, visivel } = useRevelar()
+  const { ref, visivel } = useRevelar({ margem })
 
   const classeRevelar = visivel ? `${estilos.revelar} ${estilos.visivel}` : estilos.revelar
   const classeFinal = className ? `${classeRevelar} ${className}` : classeRevelar

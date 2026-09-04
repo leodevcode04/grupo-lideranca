@@ -19,11 +19,17 @@ function IconeEstrela({ preenchida }) {
   )
 }
 
-export default function Estrelas({ nota }) {
+export default function Estrelas({ nota = 5 }) {
+  const notaNormalizada = Math.max(0, Math.min(5, Math.round(nota)))
+
   return (
-    <span className={estilos.estrelas} role="img" aria-label={`${nota} de 5 estrelas`}>
+    <span
+      className={estilos.estrelas}
+      role="img"
+      aria-label={`${notaNormalizada} de 5 estrelas`}
+    >
       {ICONES.map((indice) => (
-        <IconeEstrela key={indice} preenchida={indice < nota} />
+        <IconeEstrela key={indice} preenchida={indice < notaNormalizada} />
       ))}
     </span>
   )

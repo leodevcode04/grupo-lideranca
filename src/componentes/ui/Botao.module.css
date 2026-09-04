@@ -5,7 +5,7 @@
   gap: var(--e-1);
   border: 1px solid transparent;
   border-radius: var(--raio);
-  padding: 1rem 2rem;
+  padding: var(--e-2) var(--e-4);
   font-family: var(--fonte-corpo);
   font-weight: 600;
   font-size: var(--t-corpo);
@@ -63,30 +63,24 @@
   right: 0;
 }
 
-.botao:disabled,
-.desabilitado {
+.botao:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none;
 }
 
-.primario:disabled:hover,
-.primario.desabilitado:hover {
+.primario:disabled:hover {
   background: var(--dourado);
 }
 
-.contorno:disabled:hover,
-.contorno.desabilitado:hover {
+.contorno:disabled:hover {
   border-color: var(--azul-borda);
   color: var(--gelo);
 }
 
-.texto:disabled:hover,
-.texto.desabilitado:hover {
+.texto:disabled:hover {
   color: var(--gelo);
 }
 
-.texto:disabled::after,
-.texto.desabilitado::after {
+.texto:disabled::after {
   right: 100%;
 }

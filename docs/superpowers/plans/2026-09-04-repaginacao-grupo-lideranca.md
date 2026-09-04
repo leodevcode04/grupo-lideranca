@@ -217,7 +217,8 @@ reporte como BLOCKED em vez de tentar contornar.
   --z-menu: 300;
 
   /* Movimento */
-  --transicao: 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  --curva: cubic-bezier(0.22, 1, 0.36, 1);
+  --transicao: 400ms var(--curva);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -235,8 +236,12 @@ reporte como BLOCKED em vez de tentar contornar.
 
 **Regras que valem para as 13 tarefas seguintes:**
 
-- Nenhuma cor, sombra ou `z-index` literal fora deste arquivo. Se faltar um token,
-  reporte em vez de inventar um valor solto.
+- Nenhuma cor, sombra, espaçamento ou `z-index` literal fora deste arquivo. Se faltar um
+  token, reporte em vez de inventar um valor solto. Isso vale mesmo quando o texto de uma
+  tarefa escreve o valor por extenso: "padding de 1rem 2rem" significa
+  `var(--e-2) var(--e-4)`.
+- `--transicao` empacota duração e curva. Quem precisar de outra duração usa
+  `--curva` sozinha: `transition: opacity 700ms var(--curva)`.
 - O bloco `prefers-reduced-motion` acima **não alcança o Framer Motion**, que anima por
   `style` inline. Por isso o `main.jsx` envolve a árvore em `<MotionConfig
   reducedMotion="user">` (Step 7) — é o que faz a preferência valer de verdade.
@@ -501,7 +506,7 @@ git commit -m "Adiciona roteamento, páginas stub e transição entre rotas"
 
 ---
 
-### Task 3: Componentes de UI base
+### Task 3: Componentes de UI base ✅ (revisada)
 
 **Files:**
 - Create: `src/hooks/useRevelar.js`
@@ -510,9 +515,17 @@ git commit -m "Adiciona roteamento, páginas stub e transição entre rotas"
 - Create: `src/componentes/ui/Secao.jsx` + `.module.css`
 - Create: `src/componentes/ui/Estrelas.jsx` + `.module.css`
 
+Estes quatro componentes são o vocabulário em que o resto do site é escrito. `Secao`
+embrulha quase toda seção de toda página, `Botao` é todo CTA, `Revelar` anima quase todo
+conteúdo, `Estrelas` aparece nos depoimentos. Trate os contratos de props como API
+pública: prop mal nomeada ou esquecida aqui vira contorno em onze lugares depois.
+
+Nada em `ui/` conhece o domínio. Sem tipo de veículo, sem telefone, sem texto sobre
+proteção veicular — os componentes têm que funcionar num site sem relação nenhuma.
+
 - [ ] **Step 1: Criar `useRevelar.js`**
 
-```jsx
+```js
 import { useEffect, useRef, useState } from 'react'
 
 export function useRevelar({ margem = '0px 0px -12% 0px' } = {}) {
@@ -522,6 +535,10 @@ export function useRevelar({ margem = '0px 0px -12% 0px' } = {}) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisivel(true)
+      return
+    }
     const observador = new IntersectionObserver(
       ([entrada]) => {
         if (entrada.isIntersecting) {
@@ -529,7 +546,7 @@ export function useRevelar({ margem = '0px 0px -12% 0px' } = {}) {
           observador.unobserve(el)
         }
       },
-      { threshold: 0.15, rootMargin: margem }
+      { threshold: 0, rootMargin: margem }
     )
     observador.observe(el)
     return () => observador.disconnect()
@@ -539,56 +556,115 @@ export function useRevelar({ margem = '0px 0px -12% 0px' } = {}) {
 }
 ```
 
+**`threshold: 0` é obrigatório, não preferência.** Com `threshold: 0.15` e a margem
+negativa de 12%, a raiz efetiva tem `0.88 × altura da viewport`, então a razão máxima de
+interseção que um elemento de altura `T` alcança é `0.88H / T`. Para cruzar 0.15 é
+preciso `T ≤ 5.87H` — qualquer bloco mais alto que ~5.9 viewports **nunca dispara e fica
+em `opacity: 0` para sempre**. Numa viewport de 640px isso dá ~3760px: o acordeão de dez
+perguntas da Tarefa 8 e a linha do tempo da Tarefa 13 passam disso. Falha só em tela
+curta e parece sumiço de dados, não bug de animação. A margem negativa sozinha já
+entrega o atraso desejado; o threshold era redundante e é a metade que quebra.
+
+A guarda de `IntersectionObserver` indefinido evita o outro modo de falha permanente:
+conteúdo que nunca aparece em ambiente sem suporte.
+
 - [ ] **Step 2: Criar `Revelar.jsx`**
 
-Recebe `children`, `atraso` (número em ms, padrão `0`) e `as` (tag, padrão `'div'`).
-Usa `useRevelar`, aplica a classe de revelado quando `visivel` e passa o atraso via
-`style={{ transitionDelay: `${atraso}ms` }}`. No CSS: estado inicial com
-`opacity: 0; transform: translateY(28px)`, estado revelado zerando ambos, transição de
-`700ms` com a curva dos tokens.
+Props: `children`, `atraso` (ms, padrão `0`), `as` (tag, padrão `'div'`), `margem`
+(repassada ao hook) e `className`.
+
+**Destructure `className` e `style` das props em vez de deixá-los cair no `...resto`.**
+Espalhar `{...resto}` depois de `className={...}` faz o `className` do chamador apagar as
+classes de reveal — e o `Secao` passa `className`, então todo cabeçalho de seção ficaria
+invisível. Componha as três classes numa string só. O `style` do chamador entra mesclado
+com o `transitionDelay`, não substituído por ele.
+
+CSS: estado inicial `opacity: 0; transform: translateY(28px)`, estado revelado zerando
+ambos, `transition: opacity 700ms var(--curva), transform 700ms var(--curva)`.
+
+Não é preciso `useReducedMotion` aqui: a animação é CSS, então o bloco
+`prefers-reduced-motion` do `tokens.css` já a alcança — inclusive o
+`transition-delay: 0s !important`, que neutraliza o `transitionDelay` inline.
 
 - [ ] **Step 3: Criar `Botao.jsx`**
 
 Props: `variante` (`'primario' | 'contorno' | 'texto'`, padrão `'primario'`), `para`
-(rota interna — renderiza `Link`), `href` (link externo — renderiza `<a>` com
-`target="_blank"` e `rel="noreferrer"`), `onClick` (renderiza `<button>`), `tipo`,
-`desabilitado`, `children`.
+(rota interna → `Link`), `href` (link externo → `<a>`), `tipo`, `desabilitado`,
+`className`, `children`, mais `...resto`.
 
-Requisitos visuais: `primario` em `--dourado` com texto `--azul-noite`; `contorno` com
-borda de 1px em `--azul-borda` e texto `--gelo`; `texto` sem fundo, com sublinhado
-dourado que cresce no hover. Todos com `--raio`, padding de `1rem 2rem`, peso 600 e
-transição dos tokens. Estado `:disabled` com opacidade reduzida e cursor bloqueado.
+**O elemento é escolhido só por `para` → `href` → `<button>`.** `onClick` **não**
+participa dessa escolha: é repassado ao elemento que for renderizado, qualquer que seja.
+Tratar `onClick` como seletor de modo faz `<Botao para="/cotacao" onClick={aoFechar}>`
+navegar sem nunca chamar o `onClick` — que é exatamente o que o drawer da Tarefa 5
+precisa (fechar ao clicar no item). Deixe `onClick` cair no `...resto` e espalhe nos três
+ramos.
+
+`className` também precisa ser destructurado e composto, pelo mesmo motivo do `Revelar`.
+Espalhar `...resto` depois de `className` faria `<Botao className={estilos.blocoMobile}>`
+perder `.botao` e toda a aparência.
+
+`target="_blank"` só quando o `href` for de fato externo — teste com
+`/^https?:/i.test(href)`. Sem isso, `tel:` e `mailto:` (Tarefa 8 no CTA final, Tarefa 13
+no Contato) abrem e abandonam uma aba em branco.
+
+`desabilitado` vale **apenas** no modo `<button>`, como `disabled` nativo. Não invente
+link desabilitado: nenhuma tarefa do plano precisa disso, e um `<span>` focável que não
+faz nada é um beco sem saída para quem navega por teclado.
+
+Requisitos visuais: `primario` com fundo `--dourado` e texto `--azul-noite`; `contorno`
+com borda de 1px em `--azul-borda` e texto `--gelo`; `texto` sem fundo, com sublinhado
+dourado que cresce no hover. Todos com `--raio`, `padding: var(--e-2) var(--e-4)`, peso
+600 e `transition: var(--transicao)`. O `padding-inline: 0` da variante `texto` precisa
+vir **depois** do padding base na ordem do arquivo.
+
+No `:disabled`, use opacidade reduzida e `cursor: not-allowed` — **sem**
+`pointer-events: none`, que suprime a resolução do cursor e portanto anula o próprio
+`not-allowed`, além de tornar morta qualquer regra de `:hover` do estado desabilitado.
+
+Em desenvolvimento, avise quando a variante não existir — com dezenas de chamadas,
+`variante="outline"` renderizaria como primário sem sinal nenhum. Um `console.warn`
+guardado por `import.meta.env.DEV` some do bundle de produção.
 
 - [ ] **Step 4: Criar `Secao.jsx`**
 
-Props: `id`, `etiqueta` (texto miúdo em versalete dourado acima do título), `titulo`,
-`subtitulo`, `fundo` (`'noite' | 'profundo' | 'elevado'`, padrão `'noite'`),
-`children`, `centralizado` (booleano).
+Props: `id`, `etiqueta`, `titulo`, `subtitulo`, `fundo` (`'noite' | 'profundo' |
+'elevado'`, padrão `'noite'`), `centralizado`, `className`, `children`, mais `...resto`
+espalhado no `<section>`.
 
-Renderiza `<section>` com padding vertical `--e-secao`, um `.container` interno, e o
-cabeçalho envolto em `Revelar`. A etiqueta leva um filete dourado de 24px antes do
+`className` e `...resto` não são luxo: são o único ponto de extensão de um componente que
+embrulha quase toda seção do site. Sem eles, o FAQ da Tarefa 8 (que precisa de coluna de
+860px) e a textura `.grao` do `global.css` não têm como ser aplicados, e o chamador acaba
+enfiando uma `div` extra dentro de `children`, furando o layout do `.container`.
+
+`<section>` só vira landmark com nome acessível. Como o componente já tem `id` e
+`titulo`, ligue `aria-labelledby` ao `<h2>` (id derivado do `id` da seção) — sai de graça
+e deixa as sete páginas navegáveis por landmark.
+
+Renderiza `<section>` com padding vertical `--e-secao` e um `.container` interno. Só o
+cabeçalho vai dentro de `Revelar`; **os `children` não**. As Tarefas 6–8 precisam de
+`atraso` por card (a Tarefa 7 usa `índice * 90`), e revelar os filhos em bloco obrigaria
+todas elas a optar por fora. A etiqueta leva um filete dourado de `var(--e-3)` antes do
 texto.
 
 - [ ] **Step 5: Criar `Estrelas.jsx`**
 
-Props: `nota` (1 a 5). Renderiza cinco SVGs de estrela, preenchidas em `--dourado` até
-`nota` e em `--gelo-tenue` no restante. Inclui
-`aria-label={`${nota} de 5 estrelas`}` e `role="img"`.
+Props: `nota` (padrão `5`). Cinco SVGs, preenchidos em `--dourado` até `nota` e em
+`--gelo-tenue` no restante. `role="img"` no invólucro com um `aria-label` no formato
+"N de 5 estrelas", e `aria-hidden` em cada SVG.
+
+Normalize a entrada com `Math.max(0, Math.min(5, Math.round(nota)))` — é API pública e vai
+receber dados de avaliação. Sem isso, `nota={undefined}` anuncia "undefined de 5
+estrelas" e `nota={4.6}` pinta cinco.
 
 - [ ] **Step 6: Conferir**
 
-Renderize os quatro componentes temporariamente na Home e confira no navegador que os
-botões respondem ao hover, o `Revelar` anima ao rolar e as estrelas mostram a nota
-certa. Depois desfaça essa renderização temporária.
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add -A
-git commit -m "Adiciona componentes de UI base e hook de reveal"
-```
-
----
+Renderize os componentes temporariamente na Home e confira no navegador: hover nas três
+variantes, foco visível em todas, o `Revelar` animando ao rolar, as estrelas com a nota
+certa. Confira também os dois modos que falham em silêncio: um `Revelar` em volta de um
+bloco de ~4000px numa viewport de 640px (tem que aparecer), e um `Botao` com `para`,
+`onClick` e `className` juntos (tem que navegar, chamar o handler e manter a aparência).
+Depois desfaça a renderização temporária e confirme com `git diff` que a `Home.jsx`
+voltou ao stub.
 
 ### Task 4: Módulos de dados
 

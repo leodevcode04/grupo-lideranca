@@ -1,0 +1,107 @@
+.trilha {
+  display: flex;
+  gap: var(--e-4);
+}
+
+.passo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+/* Círculo + conector. Um bloco que só sabe do próprio "trilho": o conector
+   é `flex: 1`, então preenche exatamente o espaço restante do bloco (na
+   horizontal aqui, na vertical no mobile) — nunca calcula posição a partir
+   de um container cujo tamanho muda com o texto do passo ao lado. É por
+   isso que um título de duas linhas não quebra a linha (ver verificação). */
+.marcador {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.circulo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 1px solid var(--dourado);
+  background: var(--azul-elevado);
+  color: var(--dourado);
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+}
+
+.conector {
+  flex: 1;
+  height: 0;
+  margin-inline-start: var(--e-2);
+  border-top: 2px dashed var(--dourado);
+}
+
+.texto {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--e-1);
+}
+
+.tituloPasso {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  color: var(--gelo);
+}
+
+.descricao {
+  margin: 0;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}
+
+.cta {
+  align-self: center;
+}
+
+/* No mobile a trilha vira uma coluna e o marcador gira: o círculo fica em
+   cima do texto e o conector vira um traço vertical. `.passo` empilha o
+   marcador (rail) à esquerda e o texto à direita via flex-direction: row;
+   `align-items: stretch` (padrão) faz o marcador esticar até a MESMA altura
+   do bloco de texto — o conector (flex: 1) então preenche do fim do círculo
+   até o fim do texto, e como não há gap entre passos, encosta exatamente no
+   círculo seguinte. Continua conectado mesmo quando um título quebra em
+   duas linhas, porque nunca assume uma altura fixa. */
+@media (max-width: 700px) {
+  .trilha {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .passo {
+    flex-direction: row;
+    gap: var(--e-3);
+  }
+
+  .marcador {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .conector {
+    width: 0;
+    height: auto;
+    margin-inline-start: 0;
+    margin-block-start: var(--e-2);
+    border-top: none;
+    border-left: 2px dashed var(--dourado);
+  }
+
+  .texto {
+    padding-bottom: var(--e-4);
+  }
+}

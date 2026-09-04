@@ -1,0 +1,73 @@
+.grade {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--e-4);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding-inline-end: var(--e-4);
+  border-inline-end: 1px solid var(--azul-borda);
+}
+
+.item:last-child {
+  padding-inline-end: 0;
+  border-inline-end: none;
+}
+
+.numeral {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-secao);
+  color: var(--dourado);
+  opacity: 0.25;
+  line-height: 1;
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  color: var(--gelo);
+}
+
+.texto {
+  margin: 0;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}
+
+/* Grade 2x2 abaixo de 900px: mesma armadilha do FaixaNumeros (Tarefa 6, 5.3)
+   — :last-child não enxerga quebra de linha do grid, então o item 2 (fim da
+   primeira linha) manteria o divisor à direita, pendurado no vazio. */
+@media (max-width: 900px) {
+  .grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .item:nth-child(2n) {
+    padding-inline-end: 0;
+    border-inline-end: none;
+  }
+}
+
+/* Coluna única abaixo de 640px: o divisor vertical não faz sentido entre
+   linhas — vira um filete horizontal separando os itens empilhados. */
+@media (max-width: 640px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+
+  .item {
+    padding-inline-end: 0;
+    border-inline-end: none;
+    padding-bottom: var(--e-4);
+    border-bottom: 1px solid var(--azul-borda);
+  }
+
+  .item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}

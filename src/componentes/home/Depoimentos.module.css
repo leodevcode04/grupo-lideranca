@@ -1,0 +1,124 @@
+.carrossel {
+  position: relative;
+  max-width: 760px;
+  margin-inline: auto;
+  padding-top: var(--e-4);
+}
+
+.aspa {
+  position: absolute;
+  top: -1.5rem;
+  left: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 8rem;
+  line-height: 1;
+  color: var(--dourado);
+  opacity: 0.18;
+  pointer-events: none;
+  user-select: none;
+}
+
+.palco {
+  position: relative;
+  min-height: 220px;
+}
+
+.slide {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
+  text-align: center;
+}
+
+.texto {
+  margin: 0;
+  max-width: 620px;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  font-style: italic;
+  color: var(--gelo);
+}
+
+.assinatura {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.nome {
+  font-weight: 600;
+  color: var(--gelo);
+}
+
+.cidade {
+  color: var(--gelo-suave);
+  font-size: var(--t-mini);
+}
+
+.controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-3);
+  margin-top: var(--e-4);
+}
+
+.seta,
+.pausa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--azul-borda);
+  background: transparent;
+  color: var(--gelo);
+  cursor: pointer;
+  transition: border-color var(--transicao), color var(--transicao);
+}
+
+.seta:hover,
+.pausa:hover {
+  border-color: var(--dourado);
+  color: var(--dourado);
+}
+
+.pontos {
+  display: flex;
+  align-items: center;
+  gap: var(--e-1);
+}
+
+.ponto {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--azul-borda-forte);
+  cursor: pointer;
+  transition: background var(--transicao), transform var(--transicao);
+}
+
+.ponto:hover {
+  background: var(--dourado-claro);
+}
+
+.pontoAtivo {
+  background: var(--dourado);
+  transform: scale(1.3);
+}
+
+@media (max-width: 640px) {
+  .aspa {
+    font-size: 5rem;
+    top: -1rem;
+  }
+
+  .texto {
+    font-size: var(--t-corpo);
+  }
+}

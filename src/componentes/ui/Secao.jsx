@@ -1,4 +1,5 @@
 import Revelar from './Revelar.jsx'
+import Etiqueta from './Etiqueta.jsx'
 import estilos from './Secao.module.css'
 
 export default function Secao({
@@ -31,12 +32,7 @@ export default function Secao({
             as="div"
             className={`${estilos.cabecalho} ${centralizado ? estilos.centralizado : ''}`}
           >
-            {etiqueta && (
-              <p className={estilos.etiqueta}>
-                <span className={estilos.filete} aria-hidden="true" />
-                {etiqueta}
-              </p>
-            )}
+            {etiqueta && <Etiqueta>{etiqueta}</Etiqueta>}
             {titulo && (
               <h2 id={idTitulo} className={estilos.titulo}>
                 {titulo}

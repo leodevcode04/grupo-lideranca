@@ -1,6 +1,6 @@
 .grade {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--e-4);
 }
 
@@ -9,6 +9,11 @@
   display: flex;
   align-items: flex-end;
   min-height: 340px;
+  /* A grade estica o wrapper do Revelar (align-items: stretch é o padrão do
+     grid), mas sem isto o Link em si não acompanha: o primeiro card cuja
+     `chamada` quebrar em três linhas deixaria um vão morto sob a foto dos
+     outros. Ver Tarefa 6, 5.10. */
+  height: 100%;
   border-radius: var(--raio-card);
   overflow: hidden;
   isolation: isolate;
@@ -20,14 +25,24 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-size: cover;
-  background-position: center;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   filter: grayscale(1);
   transform: scale(1);
   transition: filter var(--transicao), transform var(--transicao);
 }
 
-.cartao:hover .foto,
+/* Hover atrás de (hover: hover): no toque o :hover gruda — o usuário toca um
+   card, navega, volta e encontra o card ainda colorido, escalado e com a
+   seta deslocada. :focus-visible fica fora da media query. */
+@media (hover: hover) {
+  .cartao:hover .foto {
+    filter: grayscale(0);
+    transform: scale(1.06);
+  }
+}
+
 .cartao:focus-visible .foto {
   filter: grayscale(0);
   transform: scale(1.06);
@@ -42,16 +57,35 @@
     rgba(var(--azul-noite-rgb), 0.92) 0%,
     rgba(var(--azul-noite-rgb), 0.35) 70%
   );
-  transition: background var(--transicao);
 }
 
-.cartao:hover .sobreposicao,
-.cartao:focus-visible .sobreposicao {
+/* Cross-fade por opacity, não por background: interpolar entre dois
+   linear-gradient repinta a área inteira do card a cada quadro (vezes quatro
+   no hover-out). A camada de hover vive num ::after, parte de opacity: 0 e
+   sobe pra 1 — opacity promove pra composição própria, sem repintar. Ver
+   Tarefa 6, 5.6 — corrigido aqui antes de as Tarefas 7, 8 e 12 copiarem o
+   padrão antigo. */
+.sobreposicao::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
     0deg,
     rgba(var(--azul-noite-rgb), 0.72) 0%,
     rgba(var(--azul-noite-rgb), 0.15) 70%
   );
+  opacity: 0;
+  transition: opacity var(--transicao);
+}
+
+@media (hover: hover) {
+  .cartao:hover .sobreposicao::after {
+    opacity: 1;
+  }
+}
+
+.cartao:focus-visible .sobreposicao::after {
+  opacity: 1;
 }
 
 .texto {
@@ -84,14 +118,19 @@
   transition: transform var(--transicao);
 }
 
-.cartao:hover .seta,
+@media (hover: hover) {
+  .cartao:hover .seta {
+    transform: translateX(6px);
+  }
+}
+
 .cartao:focus-visible .seta {
   transform: translateX(6px);
 }
 
 @media (max-width: 900px) {
   .grade {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

@@ -1,14 +1,16 @@
 :root {
   /* Cor */
   --azul-noite: #0B1A2E;
+  --azul-noite-rgb: 11, 26, 46;   /* para superfícies translúcidas */
   --azul-profundo: #071320;
   --azul-elevado: #12263F;
-  --azul-borda: rgba(234, 240, 247, 0.10);
+  --azul-borda: rgba(234, 240, 247, 0.10);        /* divisores decorativos */
+  --azul-borda-forte: rgba(234, 240, 247, 0.38);  /* contorno de campo de formulário — precisa de 3:1 (mede ~3.24:1) */
   --dourado: #C6A04A;
   --dourado-claro: #E0C079;
   --gelo: #EAF0F7;
   --gelo-suave: rgba(234, 240, 247, 0.60);
-  --gelo-tenue: rgba(234, 240, 247, 0.38);
+  --gelo-tenue: rgba(234, 240, 247, 0.50);        /* mínimo para texto normal; abaixo disso reprova AA */
 
   /* Tipografia */
   --fonte-titulo: 'Fraunces', Georgia, serif;
@@ -24,15 +26,26 @@
   --e-1: 0.5rem;
   --e-2: 1rem;
   --e-3: 1.5rem;
-  --e-4: 2.5rem;
-  --e-5: 4rem;
-  --e-6: 6rem;
+  --e-4: 2rem;
+  --e-5: 2.5rem;
+  --e-6: 4rem;
+  --e-7: 6rem;
   --e-secao: clamp(5rem, 12vw, 9rem);
 
   /* Forma */
   --raio: 4px;
   --raio-card: 10px;
   --largura-max: 1280px;
+
+  /* Elevação */
+  --sombra-card: 0 1px 2px rgba(7, 19, 32, 0.40), 0 8px 24px rgba(7, 19, 32, 0.35);
+  --sombra-flutuante: 0 12px 32px rgba(7, 19, 32, 0.55);
+
+  /* Camadas */
+  --z-grao: 1;
+  --z-cabecalho: 100;
+  --z-flutuante: 200;
+  --z-menu: 300;
 
   /* Movimento */
   --transicao: 400ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -42,7 +55,10 @@
   :root { --transicao: 1ms; }
   *, *::before, *::after {
     animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
     transition-duration: 1ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
 }

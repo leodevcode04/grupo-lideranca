@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import './tokens.css';
 
 *,
@@ -35,18 +35,31 @@ svg {
 h1,
 h2,
 h3,
-h4 {
+h4,
+h5,
+h6 {
   font-family: var(--fonte-titulo);
   line-height: 1.05;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 a {
   color: inherit;
 }
 
+input,
+select,
+textarea,
 button {
-  font-family: inherit;
+  font: inherit;
+  color: inherit;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 :focus-visible {
@@ -60,16 +73,19 @@ button {
   padding-inline: clamp(1.25rem, 5vw, 3rem);
 }
 
-/* Textura de grão reaproveitável — usada pelo hero e cabeçalhos internos.
-   O elemento pai deve ter position: relative (ou absolute/fixed) e overflow: hidden. */
+/* Aplique em qualquer seção que precise da textura. O elemento vira contexto de
+   posicionamento e recorta a própria textura — o consumidor não precisa lembrar disso. */
 .grao {
   position: relative;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .grao::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: var(--z-grao);
   pointer-events: none;
   opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23r)'/%3E%3C/svg%3E");

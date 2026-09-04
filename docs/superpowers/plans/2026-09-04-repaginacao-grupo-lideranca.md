@@ -95,11 +95,23 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  test: { environment: 'node', include: ['src/**/*.test.js'] },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.{js,jsx}'],
+    passWithNoTests: true,
+  },
 })
 ```
 
+O glob inclui `.jsx` porque `include` **substitui** o padrão do Vitest — sem isso um
+teste em arquivo `.jsx` nunca roda e o relatório sai verde. `passWithNoTests` evita que
+`npm test` saia com código 1 nas tarefas anteriores à 9, quando ainda não existe teste.
+
 - [ ] **Step 3: Escrever `index.html` na raiz**
+
+O `preconnect` para `fonts.gstatic.com` corta um salto do caminho crítico: como as
+fontes são pedidas por `@import` dentro do CSS, o navegador só descobre o domínio depois
+de baixar e parsear o bundle.
 
 ```html
 <!doctype html>
@@ -107,6 +119,10 @@ export default defineConfig({
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0B1A2E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B1A2E'/%3E%3Cpath d='M11 8h3v13h7v3h-10z' fill='%23C6A04A'/%3E%3C/svg%3E" />
     <title>Grupo Liderança — Proteção Veicular</title>
     <meta name="description" content="Proteção veicular para carros, motos e caminhões. Cobertura nacional, assistência 24h e indenização de até 100% da tabela FIPE." />
   </head>
@@ -129,14 +145,16 @@ reporte como BLOCKED em vez de tentar contornar.
 :root {
   /* Cor */
   --azul-noite: #0B1A2E;
+  --azul-noite-rgb: 11, 26, 46;   /* para superfícies translúcidas */
   --azul-profundo: #071320;
   --azul-elevado: #12263F;
-  --azul-borda: rgba(234, 240, 247, 0.10);
+  --azul-borda: rgba(234, 240, 247, 0.10);        /* divisores decorativos */
+  --azul-borda-forte: rgba(234, 240, 247, 0.30);  /* contorno de campo de formulário — precisa de 3:1 */
   --dourado: #C6A04A;
   --dourado-claro: #E0C079;
   --gelo: #EAF0F7;
   --gelo-suave: rgba(234, 240, 247, 0.60);
-  --gelo-tenue: rgba(234, 240, 247, 0.38);
+  --gelo-tenue: rgba(234, 240, 247, 0.50);        /* mínimo para texto normal; abaixo disso reprova AA */
 
   /* Tipografia */
   --fonte-titulo: 'Fraunces', Georgia, serif;
@@ -152,15 +170,26 @@ reporte como BLOCKED em vez de tentar contornar.
   --e-1: 0.5rem;
   --e-2: 1rem;
   --e-3: 1.5rem;
-  --e-4: 2.5rem;
-  --e-5: 4rem;
-  --e-6: 6rem;
+  --e-4: 2rem;
+  --e-5: 2.5rem;
+  --e-6: 4rem;
+  --e-7: 6rem;
   --e-secao: clamp(5rem, 12vw, 9rem);
 
   /* Forma */
   --raio: 4px;
   --raio-card: 10px;
   --largura-max: 1280px;
+
+  /* Elevação */
+  --sombra-card: 0 1px 2px rgba(7, 19, 32, 0.40), 0 8px 24px rgba(7, 19, 32, 0.35);
+  --sombra-flutuante: 0 12px 32px rgba(7, 19, 32, 0.55);
+
+  /* Camadas */
+  --z-grao: 1;
+  --z-cabecalho: 100;
+  --z-flutuante: 200;
+  --z-menu: 300;
 
   /* Movimento */
   --transicao: 400ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -170,11 +199,24 @@ reporte como BLOCKED em vez de tentar contornar.
   :root { --transicao: 1ms; }
   *, *::before, *::after {
     animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
     transition-duration: 1ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
 }
 ```
+
+**Regras que valem para as 13 tarefas seguintes:**
+
+- Nenhuma cor, sombra ou `z-index` literal fora deste arquivo. Se faltar um token,
+  reporte em vez de inventar um valor solto.
+- O bloco `prefers-reduced-motion` acima **não alcança o Framer Motion**, que anima por
+  `style` inline. Por isso o `main.jsx` envolve a árvore em `<MotionConfig
+  reducedMotion="user">` (Step 7) — é o que faz a preferência valer de verdade.
+- `--gelo-tenue` é o piso para texto de tamanho normal. Para algo mais apagado que isso,
+  use só em elemento decorativo ou em texto grande.
 
 - [ ] **Step 6: Escrever `src/estilos/global.css`**
 
@@ -186,34 +228,69 @@ importa `tokens.css`, aplica reset (`margin: 0`, `box-sizing: border-box`), defi
 offset de 3px. Adiciona `.container` com `max-width: var(--largura-max)`, margem
 automática e padding lateral de `clamp(1.25rem, 5vw, 3rem)`.
 
+Inclui ainda, porque cada um desses evita repetição nas 13 tarefas seguintes:
+
+```css
+input, select, textarea, button { font: inherit; color: inherit; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, h4, h5, h6 { font-family: var(--fonte-titulo); line-height: 1.05; font-weight: 400; }
+```
+
+Sem o primeiro, todo campo do wizard e do formulário de contato renderiza em Arial 13px
+no meio de um site em Manrope. Sem o segundo, acordeão, abas, navegação e grades de
+coberturas repetem o mesmo reset. `h5` e `h6` entram na regra de título junto com os
+demais.
+
 Define também a textura de grão usada pelo hero e pelos cabeçalhos internos, como
 utilitário reaproveitável:
 
 ```css
+/* Aplique em qualquer seção que precise da textura. O elemento vira contexto de
+   posicionamento e recorta a própria textura — o consumidor não precisa lembrar disso. */
+.grao {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
 .grao::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: var(--z-grao);
   pointer-events: none;
   opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23r)'/%3E%3C/svg%3E");
 }
 ```
 
+Atenção nas tarefas seguintes: `overflow: hidden` recorta o anel de foco
+(`outline-offset: 3px`) de qualquer botão encostado na borda de uma seção `.grao`.
+Ao posicionar CTAs dentro do hero, deixe respiro suficiente da borda.
+
 - [ ] **Step 7: Escrever `src/main.jsx`**
 
+A ordem dos imports importa: `global.css` vem **primeiro**, antes de `App.jsx`. Módulos
+ES avaliam na ordem, então importar `App.jsx` antes faria todo CSS Module alcançável por
+ele ser emitido antes do `global.css` — e o global passaria a ganhar dos módulos em
+empates de especificidade, quebrando silenciosamente o estilo dos componentes das
+tarefas seguintes.
+
 ```jsx
+import './estilos/global.css'   // primeiro: os CSS Modules precisam vencer os empates
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
 import App from './App.jsx'
-import './estilos/global.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </MotionConfig>
   </React.StrictMode>
 )
 ```

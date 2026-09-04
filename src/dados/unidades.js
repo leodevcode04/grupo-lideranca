@@ -3,8 +3,11 @@ export const unidades = [
     id: 1,
     cidade: 'Tubarão',
     uf: 'SC',
+    // Este endereço também aparece em contato.js (contato.endereco).
+    // Atualize os dois juntos ao corrigir o endereço da matriz.
     endereco: 'R. Hermes Esmeraldino, 90 — São João Margem Esquerda',
     telefone: '(48) 3621-5050',
+    telefoneHref: 'tel:+554836215050',
     matriz: true,
   },
   {
@@ -13,6 +16,7 @@ export const unidades = [
     uf: 'SC',
     endereco: 'Av. Centenário, 2340 — Centro',
     telefone: '(48) 3437-2200',
+    telefoneHref: 'tel:+554834372200',
     matriz: false,
   },
   {
@@ -21,6 +25,7 @@ export const unidades = [
     uf: 'SC',
     endereco: 'Av. Beira Mar Norte, 1500 — Centro',
     telefone: '(48) 3025-8800',
+    telefoneHref: 'tel:+554830258800',
     matriz: false,
   },
   {
@@ -29,6 +34,7 @@ export const unidades = [
     uf: 'SC',
     endereco: 'R. Coronel Córdova, 480 — Centro',
     telefone: '(49) 3222-4110',
+    telefoneHref: 'tel:+554932224110',
     matriz: false,
   },
   {
@@ -37,6 +43,7 @@ export const unidades = [
     uf: 'RS',
     endereco: 'Av. Ipiranga, 6681 — Partenon',
     telefone: '(51) 3232-7700',
+    telefoneHref: 'tel:+555132327700',
     matriz: false,
   },
   {
@@ -45,6 +52,7 @@ export const unidades = [
     uf: 'RS',
     endereco: 'R. Sinimbu, 1890 — Centro',
     telefone: '(54) 3221-9040',
+    telefoneHref: 'tel:+555432219040',
     matriz: false,
   },
 ]

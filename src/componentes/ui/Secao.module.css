@@ -1,0 +1,67 @@
+.secao {
+  padding-block: var(--e-secao);
+}
+
+.noite {
+  background: var(--azul-noite);
+}
+
+.profundo {
+  background: var(--azul-profundo);
+}
+
+.elevado {
+  background: var(--azul-elevado);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  max-width: 640px;
+}
+
+.centralizado {
+  max-width: 720px;
+  margin-inline: auto;
+  text-align: center;
+  align-items: center;
+}
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin: 0;
+  color: var(--dourado);
+  font-size: var(--t-mini);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-caps: all-small-caps;
+}
+
+.filete {
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--dourado);
+}
+
+.titulo {
+  margin: 0;
+  font-size: var(--t-secao);
+  color: var(--gelo);
+}
+
+.subtitulo {
+  margin: 0;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}

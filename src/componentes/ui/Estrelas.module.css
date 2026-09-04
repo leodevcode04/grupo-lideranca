@@ -1,0 +1,13 @@
+.estrelas {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+}
+
+.preenchida {
+  color: var(--dourado);
+}
+
+.vazia {
+  color: var(--gelo-tenue);
+}

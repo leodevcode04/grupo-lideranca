@@ -1,0 +1,151 @@
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  padding-top: var(--altura-cabecalho);
+  box-sizing: border-box;
+  background: var(--azul-noite);
+}
+
+/* A foto vive isolada numa camada própria, atrás do conteúdo, para que o
+   saturate(.5) do spec desature só ela — aplicado em .hero, o filter
+   desaturaria também o texto e os botões, que são descendentes. */
+.foto {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.5);
+}
+
+/* As paradas garantem um piso de opacidade (nunca zero) na coluna onde o texto
+   vive (até ~60% da largura do hero) — medido por amostragem real de pixel
+   atrás do h1 e do parágrafo, não só a olho. Ver Tarefa 6, critério de
+   contraste. */
+.leituraHorizontal {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--azul-noite-rgb), 0.95) 0%,
+    rgba(var(--azul-noite-rgb), 0.85) 60%,
+    rgba(var(--azul-noite-rgb), 0.75) 100%
+  );
+}
+
+.leituraVertical {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    0deg,
+    rgba(var(--azul-noite-rgb), 0.85) 0%,
+    rgba(var(--azul-noite-rgb), 0.6) 55%,
+    rgba(var(--azul-noite-rgb), 0.5) 100%
+  );
+}
+
+.wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  max-width: 720px;
+}
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin: 0;
+  color: var(--dourado);
+  font-size: var(--t-mini);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-caps: all-small-caps;
+}
+
+.filete {
+  display: inline-block;
+  width: var(--e-3);
+  height: 1px;
+  background: var(--dourado);
+}
+
+.titulo {
+  margin: 0;
+  font-size: var(--t-hero);
+  color: var(--gelo);
+}
+
+.destaque {
+  color: var(--dourado-claro);
+  font-style: italic;
+}
+
+.paragrafo {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+.faixa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-4);
+  margin: 0;
+  padding-top: var(--e-3);
+  border-top: 1px solid var(--azul-borda);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  padding-inline-end: var(--e-4);
+  border-inline-end: 1px solid var(--azul-borda);
+}
+
+.item:last-child {
+  padding-inline-end: 0;
+  border-inline-end: none;
+}
+
+.valor {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  color: var(--gelo);
+}
+
+.rotulo {
+  margin: 0;
+  color: var(--gelo-suave);
+  font-size: var(--t-mini);
+}
+
+@media (max-width: 640px) {
+  .faixa {
+    gap: var(--e-3);
+  }
+
+  .item {
+    padding-inline-end: var(--e-3);
+  }
+}

@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useScrollTopo } from './hooks/useScrollTopo.js'
+import { AnimatePresence } from 'framer-motion'
+import Transicao from './componentes/layout/Transicao.jsx'
 import Home from './paginas/Home.jsx'
 import QuemSomos from './paginas/QuemSomos.jsx'
 import Beneficios from './paginas/Beneficios.jsx'
@@ -10,24 +10,13 @@ import Contato from './paginas/Contato.jsx'
 import Cotacao from './paginas/Cotacao.jsx'
 import NaoEncontrada from './paginas/NaoEncontrada.jsx'
 
-function Transicao({ children }) {
-  return (
-    <motion.main
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.main>
-  )
-}
-
 export default function App() {
   const location = useLocation()
-  useScrollTopo()
 
   return (
+    // mode="wait" é load-bearing: garante exatamente um <main> no DOM por vez.
+    // Trocar para "sync" ou "popLayout" coloca dois elementos <main> na página
+    // simultaneamente (a página que sai e a que entra), duplicando o landmark.
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Transicao><Home /></Transicao>} />

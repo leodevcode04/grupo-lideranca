@@ -30,6 +30,31 @@ decorativas de CSS são escritas durante a implementação, guiadas pelos tokens
 e pela direção visual do spec. Cada tarefa lista os requisitos visuais que precisam ser
 atendidos — eles são o critério de aceite, não sugestão.
 
+## Nota sobre movimento reduzido
+
+Vale para todas as tarefas que animam algo. Existem **duas** camadas de movimento neste
+projeto e elas se desligam de formas diferentes:
+
+- **CSS** (transições, `@keyframes`) — coberto pelo bloco `prefers-reduced-motion` do
+  `tokens.css`. Nada a fazer por componente.
+- **Framer Motion** — anima por `style` inline via JavaScript. O bloco CSS **não o
+  alcança**, e `<MotionConfig reducedMotion="user">` no `main.jsx` desliga apenas
+  transformações e layout: **opacidade continua animando na duração cheia**.
+
+Ou seja, todo componente que anima com Framer precisa zerar a duração explicitamente:
+
+```jsx
+import { useReducedMotion } from 'framer-motion'
+
+const semMovimento = useReducedMotion()
+// ...
+transition={{ duration: semMovimento ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+```
+
+Isso atinge a transição de rota (Tarefa 2), o menu mobile (5), o hero (6), os reveals
+(3), o carrossel (7), o acordeão (8), o wizard (10–11) e o indicador de abas (12).
+Deixar de fazer reprova o critério da Tarefa 14.
+
 ## Estrutura de arquivos
 
 | Arquivo | Responsabilidade |
@@ -318,7 +343,7 @@ git commit -m "Adiciona scaffold Vite e design tokens"
 
 ---
 
-### Task 2: Roteamento, layout persistente e transição entre rotas
+### Task 2: Roteamento, layout persistente e transição entre rotas ✅
 
 **Files:**
 - Modify: `src/App.jsx`
@@ -327,17 +352,40 @@ git commit -m "Adiciona scaffold Vite e design tokens"
 
 - [ ] **Step 1: Criar `src/hooks/useScrollTopo.js`**
 
-```jsx
-import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+O hook é chamado de dentro do `Transicao`, **não do `App`**. Com `AnimatePresence
+mode="wait"` o `App` nunca desmonta, então um efeito lá dispararia assim que a URL muda
+— enquanto a página anterior ainda está na tela saindo. O scroll aconteceria no conteúdo
+errado: a partir da Tarefa 6, quem estiver lendo o FAQ no fim da home e clicar em
+"Benefícios" veria a home disparar até o próprio topo e só então sumir. `Transicao`
+monta no instante certo: depois que a antiga saiu, antes de a nova pintar.
+
+`useLayoutEffect` e não `useEffect` — a página nova já tem altura no instante do mount, e
+um efeito passivo deixaria o navegador pintar um quadro na posição antiga antes.
+
+```js
+import { useLayoutEffect } from 'react'
+import { useLocation, useNavigationType } from 'react-router-dom'
 
 export function useScrollTopo() {
-  const { pathname } = useLocation()
-  useEffect(() => {
+  const { pathname, hash } = useLocation()
+  const tipoNavegacao = useNavigationType()
+
+  useLayoutEffect(() => {
+    // Voltar/avançar: deixa o navegador restaurar a posição anterior.
+    if (tipoNavegacao === 'POP' && !hash) return
+
+    if (hash) {
+      document.querySelector(hash)?.scrollIntoView()
+      return
+    }
     window.scrollTo({ top: 0, behavior: 'instant' })
-  }, [pathname])
+  }, [pathname, hash, tipoNavegacao])
 }
 ```
+
+A guarda de `POP` é o que faz voltar/avançar parar de parecer quebrado — sem ela, voltar
+do Blog para uma home lida pela metade joga o usuário no topo. O ramo de `hash` é seguro
+para as âncoras que as Tarefas 12 e 13 podem introduzir.
 
 - [ ] **Step 2: Criar as oito páginas como stub**
 
@@ -351,12 +399,64 @@ export default function Home() {
 
 `NaoEncontrada.jsx` exibe "404 — página não encontrada" e um link para `/`.
 
-- [ ] **Step 3: Escrever `src/App.jsx` com as rotas e a transição**
+- [ ] **Step 3: Criar `src/componentes/layout/Transicao.jsx` + `.module.css`**
+
+O wrapper ganha arquivo próprio porque deixa de ser um shim visual: ele carrega o
+posicionamento do scroll, o foco e a regra de movimento reduzido.
+
+```jsx
+import { motion, useReducedMotion } from 'framer-motion'
+import { useScrollTopo } from '../../hooks/useScrollTopo.js'
+import estilos from './Transicao.module.css'
+
+export default function Transicao({ children }) {
+  const semMovimento = useReducedMotion()
+  useScrollTopo()
+
+  return (
+    <motion.main
+      id="conteudo"
+      tabIndex={-1}
+      className={estilos.pagina}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: semMovimento ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.main>
+  )
+}
+```
+
+No `.module.css`, `.pagina` recebe `min-height: 100vh` e `outline: none`.
+
+O `min-height` não é decorativo: sob `mode="wait"` existe um quadro entre a saída da
+página antiga e a entrada da nova em que o documento fica sem conteúdo. Sem altura
+mínima, o `Footer` que a Tarefa 5 coloca fora do `AnimatePresence` sobe até debaixo do
+header e desce de novo a cada navegação.
+
+O par `id="conteudo"` + `tabIndex={-1}` resolve outra coisa: hoje, ao trocar de rota, o
+foco fica num link que deixou de existir e um leitor de tela não anuncia nada. O
+`useScrollTopo` move o foco junto com o scroll — acrescente ao efeito, antes do
+`window.scrollTo`:
+
+```js
+document.getElementById('conteudo')?.focus({ preventScroll: true })
+```
+
+Esse mesmo `id` serve de alvo para o link "Pular para o conteúdo" que a Tarefa 5 precisa
+adicionar por causa do header fixo.
+
+- [ ] **Step 4: Escrever `src/App.jsx` com as rotas**
+
+`AnimatePresence mode="wait"` garante um único `<main>` no DOM por vez. Não troque para
+`sync` ou `popLayout` sem resolver a duplicação de landmark que isso cria.
 
 ```jsx
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useScrollTopo } from './hooks/useScrollTopo.js'
+import { AnimatePresence } from 'framer-motion'
+import Transicao from './componentes/layout/Transicao.jsx'
 import Home from './paginas/Home.jsx'
 import QuemSomos from './paginas/QuemSomos.jsx'
 import Beneficios from './paginas/Beneficios.jsx'
@@ -366,22 +466,8 @@ import Contato from './paginas/Contato.jsx'
 import Cotacao from './paginas/Cotacao.jsx'
 import NaoEncontrada from './paginas/NaoEncontrada.jsx'
 
-function Transicao({ children }) {
-  return (
-    <motion.main
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.main>
-  )
-}
-
 export default function App() {
   const location = useLocation()
-  useScrollTopo()
 
   return (
     <AnimatePresence mode="wait">
@@ -400,13 +486,13 @@ export default function App() {
 }
 ```
 
-- [ ] **Step 4: Conferir no navegador**
+- [ ] **Step 5: Conferir no navegador**
 
 Run: `npm run dev`, então visite `/`, `/beneficios` e `/rota-inexistente`.
 Expected: cada rota renderiza sua página; a inexistente cai no 404. Digitar a URL
 direto no navegador funciona (o dev server do Vite já faz o fallback de SPA).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -1276,23 +1362,57 @@ opacidade para `.68`).
 
 - [ ] **Step 3: Conferir `prefers-reduced-motion`**
 
-Ative a preferência no navegador e confira que os reveals aparecem sem deslocamento, o
-carrossel para de avançar sozinho e as transições de rota ficam instantâneas.
+Ative a preferência no navegador e percorra o site. O bloco CSS do `tokens.css` cobre só
+a camada CSS; cada animação de Framer precisa do `useReducedMotion` (ver "Nota sobre
+movimento reduzido" no topo). Confira **um por um**: transição de rota, entrada
+escalonada do menu mobile, entrada do hero, reveals de scroll, avanço automático do
+carrossel, abertura do acordeão, slide entre etapas do wizard e o indicador deslizante
+das abas. Qualquer um que ainda anime é um `useReducedMotion` esquecido.
 
-- [ ] **Step 4: Verificar o build**
+- [ ] **Step 4: Verificar a restauração de scroll no voltar/avançar**
+
+Pendência herdada da Tarefa 2, que não era testável lá: as páginas eram stubs de uma
+tela só. O `useScrollTopo` tem uma guarda de `POP` que sai sem fazer nada, delegando à
+restauração nativa do navegador (`history.scrollRestoration = 'auto'`).
+
+Em SPA isso é frágil: o navegador tenta restaurar a posição antes de o React ter pintado
+conteúdo com altura suficiente, e a restauração é descartada em silêncio. O
+`min-height: 100vh` do `.pagina` garante só uma tela.
+
+Num navegador comum (não automatizado), role a home até o FAQ, navegue para
+`/beneficios` e aperte Voltar. Se a posição não for restaurada, implemente a restauração
+manual: guarde `window.scrollY` por `location.key` num `Map` antes de sair e restaure no
+`POP` dentro do `useLayoutEffect`, com um `requestAnimationFrame` para esperar a pintura.
+
+- [ ] **Step 5: Configurar o fallback de SPA para produção**
+
+O `npm run dev` resolve rotas profundas sozinho, mas um host estático não: `/beneficios`
+digitado direto retornaria o 404 do próprio host, e o `NaoEncontrada` — que só pega
+navegação client-side — nunca apareceria.
+
+Crie `public/_redirects` com a regra de reescrita:
+
+```
+/*    /index.html   200
+```
+
+Isso cobre Netlify e Cloudflare Pages. Registre no README que outros hosts precisam da
+regra equivalente (`vercel.json` com `rewrites`, ou `try_files` no Nginx).
+
+- [ ] **Step 6: Verificar o build**
 
 Run: `npm run build && npm run preview`
 Expected: build sem erro nem aviso de chunk acima de 500kB. Navegue no preview e confira
 que a transição entre rotas continua fluida.
 
-- [ ] **Step 5: Escrever o `README.md`**
+- [ ] **Step 7: Escrever o `README.md`**
 
 Descreva o projeto como estudo de redesign sem vínculo com a empresa, a stack, como
 rodar (`npm install`, `npm run dev`, `npm test`), a estrutura de pastas e as decisões de
 design (paleta, tipografia, wizard). Registre que o conteúdo é aproximado e que os dados
 reais entram numa passada posterior.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add -A

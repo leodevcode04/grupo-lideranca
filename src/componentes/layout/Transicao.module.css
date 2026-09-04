@@ -1,4 +1,8 @@
 .pagina {
   min-height: 100vh;
   outline: none;
+  /* Compensa o Header fixo para toda página — ver comentário em tokens.css
+     sobre --altura-cabecalho. Fica aqui, e não em cada página, para sobreviver
+     à reescrita das páginas stub nas Tarefas 6–13. */
+  padding-top: var(--altura-cabecalho);
 }

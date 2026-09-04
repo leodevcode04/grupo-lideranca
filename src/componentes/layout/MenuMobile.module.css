@@ -1,0 +1,76 @@
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-menu);
+  display: flex;
+  flex-direction: column;
+  background: var(--azul-profundo);
+  padding: var(--e-3) clamp(1.25rem, 5vw, 3rem) var(--e-4);
+  overflow-y: auto;
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--e-2);
+}
+
+.logo {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  letter-spacing: 0.04em;
+  color: var(--gelo);
+}
+
+.logoDourado {
+  color: var(--dourado);
+}
+
+.fechar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--raio);
+  color: var(--gelo);
+  cursor: pointer;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin-top: var(--e-6);
+}
+
+.link {
+  display: block;
+  padding-block: var(--e-1);
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-secao);
+  color: var(--gelo-suave);
+  text-decoration: none;
+  transition: color var(--transicao);
+}
+
+.link:hover {
+  color: var(--gelo);
+}
+
+.linkAtivo {
+  color: var(--dourado);
+}
+
+.rodape {
+  margin-top: auto;
+  padding-top: var(--e-5);
+  border-top: 1px solid var(--azul-borda);
+}
+
+.cta {
+  width: 100%;
+}

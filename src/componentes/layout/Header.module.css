@@ -1,0 +1,145 @@
+.pularConteudo {
+  position: fixed;
+  top: var(--e-1);
+  left: var(--e-1);
+  z-index: var(--z-menu);
+  transform: translateY(-150%);
+  background: var(--dourado);
+  color: var(--azul-noite);
+  font-weight: 600;
+  padding: var(--e-1) var(--e-3);
+  border-radius: var(--raio);
+  text-decoration: none;
+  transition: transform var(--transicao);
+}
+
+.pularConteudo:focus-visible {
+  transform: translateY(0);
+}
+
+.cabecalho {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: var(--z-cabecalho);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background-color var(--transicao), border-color var(--transicao), padding var(--transicao);
+}
+
+.rolado {
+  background: rgba(var(--azul-noite-rgb), 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom-color: var(--azul-borda);
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  padding-block: var(--e-4);
+  transition: padding var(--transicao);
+}
+
+.rolado .linha {
+  padding-block: var(--e-2);
+}
+
+.logo {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--gelo);
+  white-space: nowrap;
+}
+
+.logoDourado {
+  color: var(--dourado);
+}
+
+.nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.listaNav {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+}
+
+.link {
+  position: relative;
+  display: inline-block;
+  padding-block: var(--e-1);
+  color: var(--gelo-suave);
+  text-decoration: none;
+  font-size: var(--t-mini);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: color var(--transicao);
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 0;
+  height: 2px;
+  background: var(--dourado);
+  transition: right var(--transicao);
+}
+
+.link:hover {
+  color: var(--gelo);
+}
+
+.linkAtivo {
+  color: var(--dourado);
+}
+
+.linkAtivo::after {
+  right: 0;
+}
+
+.cta {
+  flex-shrink: 0;
+}
+
+.hamburguer {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 2.75rem;
+  height: 2.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--raio);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hamburguerLinha {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--gelo);
+}
+
+@media (max-width: 900px) {
+  .nav,
+  .cta {
+    display: none;
+  }
+
+  .hamburguer {
+    display: flex;
+  }
+}

@@ -1,5 +1,8 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import Header from './componentes/layout/Header.jsx'
+import Footer from './componentes/layout/Footer.jsx'
+import WhatsAppFlutuante from './componentes/layout/WhatsAppFlutuante.jsx'
 import Transicao from './componentes/layout/Transicao.jsx'
 import Home from './paginas/Home.jsx'
 import QuemSomos from './paginas/QuemSomos.jsx'
@@ -14,20 +17,30 @@ export default function App() {
   const location = useLocation()
 
   return (
-    // mode="wait" é load-bearing: garante exatamente um <main> no DOM por vez.
-    // Trocar para "sync" ou "popLayout" coloca dois elementos <main> na página
-    // simultaneamente (a página que sai e a que entra), duplicando o landmark.
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Transicao><Home /></Transicao>} />
-        <Route path="/quem-somos" element={<Transicao><QuemSomos /></Transicao>} />
-        <Route path="/beneficios" element={<Transicao><Beneficios /></Transicao>} />
-        <Route path="/unidades" element={<Transicao><Unidades /></Transicao>} />
-        <Route path="/blog" element={<Transicao><Blog /></Transicao>} />
-        <Route path="/contato" element={<Transicao><Contato /></Transicao>} />
-        <Route path="/cotacao" element={<Transicao><Cotacao /></Transicao>} />
-        <Route path="*" element={<Transicao><NaoEncontrada /></Transicao>} />
-      </Routes>
-    </AnimatePresence>
+    <>
+      {/* Header e WhatsAppFlutuante ficam fora do AnimatePresence: são chrome
+          persistente e não devem desmontar/remontar (e portanto repintar) a
+          cada troca de rota. */}
+      <Header />
+      <WhatsAppFlutuante />
+
+      {/* mode="wait" é load-bearing: garante exatamente um <main> no DOM por vez.
+          Trocar para "sync" ou "popLayout" coloca dois elementos <main> na página
+          simultaneamente (a página que sai e a que entra), duplicando o landmark. */}
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Transicao><Home /></Transicao>} />
+          <Route path="/quem-somos" element={<Transicao><QuemSomos /></Transicao>} />
+          <Route path="/beneficios" element={<Transicao><Beneficios /></Transicao>} />
+          <Route path="/unidades" element={<Transicao><Unidades /></Transicao>} />
+          <Route path="/blog" element={<Transicao><Blog /></Transicao>} />
+          <Route path="/contato" element={<Transicao><Contato /></Transicao>} />
+          <Route path="/cotacao" element={<Transicao><Cotacao /></Transicao>} />
+          <Route path="*" element={<Transicao><NaoEncontrada /></Transicao>} />
+        </Routes>
+      </AnimatePresence>
+
+      <Footer />
+    </>
   )
 }

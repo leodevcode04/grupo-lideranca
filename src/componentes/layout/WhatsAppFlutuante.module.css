@@ -1,0 +1,20 @@
+.botao {
+  position: fixed;
+  right: var(--e-3);
+  bottom: var(--e-3);
+  z-index: var(--z-flutuante);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--dourado);
+  color: var(--azul-noite);
+  box-shadow: var(--sombra-flutuante);
+  transition: transform var(--transicao);
+}
+
+.botao:hover {
+  transform: scale(1.06);
+}

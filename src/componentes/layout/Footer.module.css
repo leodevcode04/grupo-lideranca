@@ -1,0 +1,119 @@
+.rodape {
+  background: var(--azul-profundo);
+  border-top: 1px solid var(--azul-borda);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: var(--e-6);
+  padding-block: var(--e-7);
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.logo {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  letter-spacing: 0.04em;
+  color: var(--gelo);
+}
+
+.logoDourado {
+  color: var(--dourado);
+}
+
+.institucional {
+  color: var(--gelo-tenue);
+  font-size: var(--t-mini);
+  max-width: 32ch;
+}
+
+.tituloColuna {
+  font-size: var(--t-mini);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dourado);
+  margin-bottom: var(--e-1);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+}
+
+.link {
+  color: var(--gelo-suave);
+  text-decoration: none;
+  font-size: var(--t-mini);
+  transition: color var(--transicao);
+}
+
+.link:hover {
+  color: var(--dourado);
+}
+
+.endereco {
+  color: var(--gelo-suave);
+  font-size: var(--t-mini);
+  max-width: 28ch;
+}
+
+.listaRedes {
+  display: flex;
+  gap: var(--e-2);
+}
+
+.iconeRede {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--azul-borda);
+  border-radius: var(--raio);
+  color: var(--gelo-suave);
+  transition: color var(--transicao), border-color var(--transicao);
+}
+
+.iconeRede:hover {
+  color: var(--dourado);
+  border-color: var(--dourado);
+}
+
+.barraInferior {
+  border-top: 1px solid var(--azul-borda);
+}
+
+.barraInferiorConteudo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2);
+  padding-block: var(--e-3);
+}
+
+.aviso {
+  color: var(--gelo-tenue);
+  font-size: var(--t-mini);
+}
+
+@media (max-width: 900px) {
+  .grade {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .grade {
+    grid-template-columns: 1fr;
+    padding-block: var(--e-6);
+  }
+}

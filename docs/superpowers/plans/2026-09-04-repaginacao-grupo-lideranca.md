@@ -1006,9 +1006,14 @@ Correção, nesta ordem:
 Isso cobre de uma vez as páginas das Tarefas 12 e 13, que começam com `Secao` ou
 `Cabecalho`. O hero da Tarefa 6 resolve por conta própria (ver 8.2).
 
-4. Acrescente `scroll-margin-top: var(--altura-cabecalho)` ao `#conteudo` no
+4. Acrescente `scroll-margin-top: var(--altura-cabecalho)` ao `.pagina` no
    `Transicao.module.css`. Sem isso o salto do skip link estaciona o `<main>` em y=0,
    atrás do header — o link funciona e parece não funcionar.
+
+   Escreva na classe, **não** em `#conteudo`: nesta configuração o CSS Modules hasheia
+   seletor de id igual ao de classe, então `#conteudo` compila para `#_conteudo_xxxxx` e
+   nunca casa com o `id` real posto pelo JSX. A regra existiria e não valeria nada. Vale
+   para qualquer id daqui em diante — dentro de módulo, estilize por classe.
 
 **8.2 — Regra para as Tarefas 6, 12 e 13.** Seção que sangra sob o header (hero com foto)
 usa `min-height: 100svh` com `padding-top: var(--altura-cabecalho)` e `box-sizing:

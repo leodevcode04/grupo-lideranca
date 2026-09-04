@@ -56,28 +56,74 @@ atendidos — eles são o critério de aceite, não sugestão.
 - Create: `src/main.jsx`, `src/App.jsx`
 - Create: `src/estilos/tokens.css`, `src/estilos/global.css`
 
-- [ ] **Step 1: Criar o projeto Vite**
+- [ ] **Step 1: Escrever `package.json`**
 
-```bash
-cd "D:/LIDERANCA"
-npm create vite@latest . -- --template react
+O scaffold é escrito à mão — `npm create vite` abre prompt interativo numa pasta que já
+tem `docs/` e `.git/`, e prompt trava execução automatizada.
+
+```json
+{
+  "name": "grupo-lideranca",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "framer-motion": "^11.15.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}
 ```
 
-Quando perguntar sobre a pasta não estar vazia, escolha **"Ignore files and continue"**.
+- [ ] **Step 2: Escrever `vite.config.js`**
 
-- [ ] **Step 2: Instalar dependências**
+```js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-```bash
-npm install
-npm install react-router-dom framer-motion
-npm install -D vitest
+export default defineConfig({
+  plugins: [react()],
+  test: { environment: 'node', include: ['src/**/*.test.js'] },
+})
 ```
 
-- [ ] **Step 3: Remover o boilerplate**
+- [ ] **Step 3: Escrever `index.html` na raiz**
 
-Apague `src/App.css`, `src/index.css`, `src/assets/react.svg` e `public/vite.svg`.
+```html
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grupo Liderança — Proteção Veicular</title>
+    <meta name="description" content="Proteção veicular para carros, motos e caminhões. Cobertura nacional, assistência 24h e indenização de até 100% da tabela FIPE." />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
 
-- [ ] **Step 4: Escrever `src/estilos/tokens.css`**
+- [ ] **Step 4: Instalar as dependências**
+
+Run: `npm install`
+Expected: termina sem erro de peer dependency. Se `npm` não estiver no PATH do shell,
+reporte como BLOCKED em vez de tentar contornar.
+
+- [ ] **Step 5: Escrever `src/estilos/tokens.css`**
 
 ```css
 :root {
@@ -130,7 +176,7 @@ Apague `src/App.css`, `src/index.css`, `src/assets/react.svg` e `public/vite.svg
 }
 ```
 
-- [ ] **Step 5: Escrever `src/estilos/global.css`**
+- [ ] **Step 6: Escrever `src/estilos/global.css`**
 
 Importa as fontes do Google Fonts no topo (`Fraunces` com eixos opticais e `Manrope`),
 importa `tokens.css`, aplica reset (`margin: 0`, `box-sizing: border-box`), define
@@ -154,7 +200,7 @@ utilitário reaproveitável:
 }
 ```
 
-- [ ] **Step 6: Escrever `src/main.jsx`**
+- [ ] **Step 7: Escrever `src/main.jsx`**
 
 ```jsx
 import React from 'react'
@@ -172,18 +218,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 ```
 
-- [ ] **Step 7: `src/App.jsx` provisório**
+- [ ] **Step 8: `src/App.jsx` provisório**
 
 ```jsx
 export default function App() {
   return <h1 className="container">Grupo Liderança</h1>
 }
 ```
-
-- [ ] **Step 8: Ajustar `index.html`**
-
-Trocar `lang` para `pt-BR`, o `<title>` para `Grupo Liderança — Proteção Veicular` e
-remover o link do favicon do Vite.
 
 - [ ] **Step 9: Rodar e conferir**
 
@@ -753,22 +794,12 @@ git commit -m "Adiciona blog recente, FAQ e CTA final; completa a home"
 **Files:**
 - Create: `src/dados/calculo.js`
 - Create: `src/dados/calculo.test.js`
-- Modify: `package.json`, `vite.config.js`
 
-- [ ] **Step 1: Configurar o Vitest**
+O Vitest já foi configurado na Tarefa 1 (`vite.config.js` traz a chave `test` e o
+`package.json` traz o script `test`). Confirme antes de começar; se estiver faltando,
+adicione conforme a Tarefa 1 e reporte a divergência.
 
-Em `vite.config.js`, adicione a chave `test`:
-
-```js
-export default defineConfig({
-  plugins: [react()],
-  test: { environment: 'node', include: ['src/**/*.test.js'] },
-})
-```
-
-Em `package.json`, adicione o script `"test": "vitest run"`.
-
-- [ ] **Step 2: Escrever o teste que falha**
+- [ ] **Step 1: Escrever o teste que falha**
 
 ```js
 import { describe, it, expect } from 'vitest'
@@ -815,12 +846,12 @@ describe('calcularMensalidade', () => {
 })
 ```
 
-- [ ] **Step 3: Rodar e ver falhar**
+- [ ] **Step 2: Rodar e ver falhar**
 
 Run: `npm test`
 Expected: FAIL — `calculo.js` não existe.
 
-- [ ] **Step 4: Implementar `src/dados/calculo.js`**
+- [ ] **Step 3: Implementar `src/dados/calculo.js`**
 
 ```js
 export const TAXA_ADMIN = 79
@@ -856,12 +887,12 @@ export function calcularMensalidade({ tipo, valor, ano }) {
 }
 ```
 
-- [ ] **Step 5: Rodar e ver passar**
+- [ ] **Step 4: Rodar e ver passar**
 
 Run: `npm test`
 Expected: PASS — 6 testes.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add -A

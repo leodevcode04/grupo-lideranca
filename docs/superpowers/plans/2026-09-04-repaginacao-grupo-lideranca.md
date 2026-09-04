@@ -1111,7 +1111,7 @@ git commit -m "Adiciona header, menu mobile, footer e botão de WhatsApp"
 
 ---
 
-### Task 6: Home — Hero e tipos de veículo
+### Task 6: Home — Hero e tipos de veículo ✅ (revisada)
 
 **Files:**
 - Create: `src/componentes/home/Hero.jsx` + `.module.css`
@@ -1171,7 +1171,133 @@ export default function Home() {
 Expected: o hero preenche a tela sem barra de rolagem horizontal; o texto continua
 legível sobre a foto; os cards reagem ao hover; em 375px tudo empilha sem estourar.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Correções apontadas na revisão**
+
+O hero está correto e é a tela mais importante do projeto. Está a poucas mudanças de
+ficar bom — nenhuma delas mexe em camadas, Framer, fluxo de dados ou nos contratos de
+`Secao`/`Revelar`/`Botao`, que estão certos.
+
+**5.1 — A faixa de números não está na base.** O passo 1 pede "na base"; ela é o último
+item de uma coluna flex de 501px que o `align-items: center` estaciona no meio. Medido em
+1440×900: 142px de espaço morto acima e 142px abaixo. A tela vira um bloco centralizado
+boiando no azul.
+
+Faça `.hero` uma coluna de altura cheia com o conteúdo no terço óptico e a faixa empurrada
+para baixo (`margin-top: auto` na faixa), mais `padding-bottom: var(--e-5)`. Sozinha, essa
+mudança faz mais pela leitura "banco privado, não SaaS" do que qualquer outra da lista.
+
+**5.2 — `padding-bottom: 0` solda a faixa na seção seguinte.** Quando o conteúdo passa de
+`100svh` o hero cresce e a borda inferior da faixa encosta exatamente na borda do hero
+(medido em 800×380 e 320×568). As descidas de "anos de história" tocam o limite do
+`TiposVeiculo`. É também o caso que recorta a animação de entrada: os filhos partem de
+`translateY(20px)`, então nos primeiros quadros a faixa fica fora da caixa e o
+`overflow: hidden` do `.grao` a corta. O `padding-bottom` de 6.1 resolve os dois.
+
+**5.3 — Os divisores da faixa quebram quando ela envolve.** Em 375px a faixa vira 2×2 e o
+item 2 mantém o `border-inline-end`: sobra um filete de 1px pendurado no vazio.
+`:last-child` não enxerga quebra de flex. Use grade de 2 colunas removendo a borda no
+`:nth-child(2n)`, ou reduza para dois números abaixo de 640px — a faixa envolvida ocupa
+168px, 21% de uma tela de 812px, para quatro estatísticas.
+
+**5.4 — Contradição factual na tela mais importante.** A etiqueta diz "desde 2016" e a
+faixa, 300px abaixo, diz "9 anos de história". Em 2026 são 10. O plano escreveu os dois
+valores, então o erro é meu, mas ele embarca no hero.
+
+Resolva tirando o ano da etiqueta e pondo algo concreto e verificável no lugar — isso
+também corrige a repetição de copy apontada em 5.5:
+
+```
+Associação de proteção veicular · Sul de Santa Catarina
+```
+
+**5.5 — A composição e a copy ainda leem como "SaaS escuro genérico".** Três ajustes,
+todos em `Hero.module.css` e na string do `h1`:
+
+*Hierarquia no espaço em branco.* Hoje há um gap uniforme de 24px entre cinco elementos de
+peso completamente diferente: a etiqueta de 21px fica tão longe do `h1` de 88px quanto os
+botões ficam da faixa. Espaço em branco é o instrumento principal de um hero de banco.
+Aproxime a etiqueta do título (~12px), dê mais ar aos botões (~40px) e ancore a faixa na
+base. O ar migra para dentro da composição.
+
+*A foto é paga e não é usada.* `saturate(.5)` sob um gradiente horizontal que vai de 0.95
+a **0.75** e um vertical que só chega a 0.50 significa que a imagem nunca tem região
+clara. 466 KB compram textura. O gradiente de leitura da esquerda para a direita existe
+justamente para a metade direita carregar assunto fotográfico — e ela está 75% opaca.
+Abra a parada direita (0.75 → ~0.35; o `h1` tem 14.8:1 de folga e vive nos 720px da
+esquerda) e escolha um enquadramento com o assunto à direita. Ou abandone a foto e assuma
+um campo chapado com o grão. A posição intermediária atual é o que lê como genérico.
+
+*A copy inverte valor e ornamento.* "Proteção veicular · desde 2016" e "Proteção veicular
+com confiança" repetem as mesmas duas palavras em 100px de altura, e a palavra em itálico
+dourado é `confiança` — que é o nome da nossa direção visual interna, não uma afirmação
+que um associado possa conferir. A única linha que diz algo específico e verdadeiro
+(FIPE, Sul de Santa Catarina) é o tipo menor e mais apagado da tela. Um hero de banco faz
+**uma** promessa concreta no maior corpo de texto. Leve FIPE ou a região para o `h1` e
+deixe o itálico dourado cair na palavra que importa.
+
+**5.6 — `.sobreposicao` transiciona `background`.** É propriedade de pintura: interpolar
+entre dois `linear-gradient` repinta a área inteira do card a cada quadro, vezes quatro no
+hover-out. Faça cross-fade de duas camadas empilhadas por `opacity`, ou ponha o gradiente
+de hover num `::after` indo de `opacity: 0` a `1`. Corrija **agora**: as Tarefas 7, 8 e 12
+copiam esse padrão. (O `filter, transform` do `.foto` está certo — ambos promovem.)
+
+**5.7 — Trocar `background-image` por `<img>`.** As cinco fotos são background de CSS:
+hero de **466 KB** em `w=1920&q=80` servido idêntico para um celular de 375px, mais quatro
+capas de card (100/111/159/247 KB) baixadas ansiosamente no load apesar de estarem abaixo
+da dobra. **~1,08 MB antes do primeiro scroll.** Background de CSS não tem `loading="lazy"`,
+`srcset`, `sizes` nem `decoding`.
+
+Um `<img>` com `object-fit: cover` dentro da caixa `.foto` que já existe custa umas dez
+linhas aqui e entrega à Tarefa 14 tudo de que ela precisa. Depois da Tarefa 13 vira
+mudança em seis arquivos. Acrescente também `&fm=webp&auto=format` às URLs e uma variante
+mais estreita do hero para telas pequenas.
+
+**5.8 — Guardar o hover atrás de `@media (hover: hover)`.** No toque o `:hover` gruda: o
+usuário toca um card, vai para `/beneficios`, volta e encontra aquele card ainda
+colorido, escalado e com a seta deslocada. Envolva o bloco `.cartao:hover` mantendo a
+metade `:focus-visible` fora da media query.
+
+**5.9 — Extrações que valem agora.**
+
+- **`FaixaNumeros` para `src/componentes/ui/`.** A Tarefa 13 (QuemSomos) reusa a faixa
+  literalmente, ela tem lógica interna real (o agrupamento `dl`/`dt`/`dd`, os divisores, o
+  comportamento de quebra) e os problemas 5.1 a 5.3 estão todos dentro dela — corrigir uma
+  vez é melhor que duas. Recebe `itens` e nenhum conhecimento de domínio.
+- **`Etiqueta` para `ui/`.** `.etiqueta` + `.filete` estão byte a byte iguais no
+  `Hero.module.css` e no `Secao.module.css`. A Tarefa 12 e a 13 fariam a terceira e a
+  quarta cópia.
+
+**Não extraia** um card compartilhado: Diferenciais (numeral grande, sem foto),
+BlogRecente (`<article>`, **sem link**, capa 16/10, data formatada) e TiposVeiculo (card
+inteiro é link, foto sangrada) só compartilham "grade + `Revelar` com atraso por índice".
+Abstrair três cards tendo construído um produz um saco de props com flags `temFoto` e
+`comoLink`. Construa os das Tarefas 7 e 8 separados e extraia depois, se o terceiro rimar
+de verdade.
+
+**Não extraia** um helper de stagger, mas **padronize o número**: 80ms para stagger de
+Framer no load, 90ms para reveal de scroll. São mecanismos com semântica de disparo
+diferente; um helper compartilhado brigaria com isso.
+
+**5.10 — Ajustes menores.**
+
+- `--z-grao` é load-bearing para o hero: o grão cai entre gradientes e conteúdo só porque
+  vale 1 e o `::after` é o último no DOM. Subir esse token para 3 numa tarefa futura faria
+  o grão pintar por cima do `h1` e dos CTAs, em silêncio, num arquivo que ninguém abriu.
+  Escreva `z-index: calc(var(--z-grao) + 1)` no `.wrapper` ou deixe a nota no `tokens.css`.
+- `.cartao` tem `min-height: 340px` mas não `height: 100%`. Hoje todos medem 340, mas a
+  grade estica o wrapper do `Revelar` e o `Link` não acompanha: o primeiro card cuja
+  `chamada` quebrar em três linhas deixa os outros com um vão morto sob a foto.
+- `repeat(4, 1fr)` → `repeat(4, minmax(0, 1fr))`.
+- `FOTO_HERO` está hardcoded no `Hero.jsx` enquanto toda outra imagem do projeto vive em
+  `src/dados/`. É a única foto que não se acha abrindo `src/dados/`.
+- Comente no `.hero` que ele é a variante "sangra sob o header" do passo 8.2 da Tarefa 5, e
+  que o outro caso é tratado pelo `.secao:first-child` — poupa às Tarefas 12 e 13 uma
+  leitura do plano.
+- A proteção do anel de foco contra o `overflow: hidden` do `.grao` hoje é acidental: vem
+  do gutter do `.container`, não de algo que o hero declare. Uma linha de comentário no
+  `.wrapper` evita que alguém "simplifique" essa classe embora.
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -1272,7 +1398,7 @@ BlogRecente · FAQ · CtaFinal.
 Expected: o acordeão abre um item por vez com animação suave, navegável por teclado
 (Tab e Enter); a home inteira rola sem quebra de layout em 375px, 768px e 1440px.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add -A

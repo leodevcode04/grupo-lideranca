@@ -49,7 +49,7 @@ atendidos — eles são o critério de aceite, não sugestão.
 
 ---
 
-### Task 1: Scaffold do projeto e design tokens
+### Task 1: Scaffold do projeto e design tokens ✅
 
 **Files:**
 - Create: `package.json`, `vite.config.js`, `index.html`
@@ -149,7 +149,7 @@ reporte como BLOCKED em vez de tentar contornar.
   --azul-profundo: #071320;
   --azul-elevado: #12263F;
   --azul-borda: rgba(234, 240, 247, 0.10);        /* divisores decorativos */
-  --azul-borda-forte: rgba(234, 240, 247, 0.30);  /* contorno de campo de formulário — precisa de 3:1 */
+  --azul-borda-forte: rgba(234, 240, 247, 0.38);  /* contorno de campo de formulário — 3.24:1, acima do mínimo de 3:1 */
   --dourado: #C6A04A;
   --dourado-claro: #E0C079;
   --gelo: #EAF0F7;

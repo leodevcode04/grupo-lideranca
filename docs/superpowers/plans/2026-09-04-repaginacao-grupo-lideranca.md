@@ -666,10 +666,10 @@ bloco de ~4000px numa viewport de 640px (tem que aparecer), e um `Botao` com `pa
 Depois desfaça a renderização temporária e confirme com `git diff` que a `Home.jsx`
 voltou ao stub.
 
-### Task 4: Módulos de dados
+### Task 4: Módulos de dados ✅ (revisada)
 
 **Files:**
-- Create: `src/dados/veiculos.js`, `diferenciais.js`, `faq.js`, `depoimentos.js`, `posts.js`, `unidades.js`, `contato.js`
+- Create: `src/dados/veiculos.js`, `diferenciais.js`, `faq.js`, `depoimentos.js`, `posts.js`, `unidades.js`, `contato.js`, `numeros.js`
 
 Conteúdo aproximado nesta fase — os dados reais entram numa passada posterior.
 
@@ -778,7 +778,108 @@ Nenhum desses valores precisa ser verdadeiro — a passada de dados reais vem de
 O que não pode é o módulo sair desta tarefa vazio ou com texto de preenchimento
 genérico tipo "lorem ipsum".
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Correções de contrato apontadas na revisão**
+
+Sete ajustes que evitam que componentes contornem o que falta aqui. Cada um foi
+rastreado até a tarefa que consome o campo.
+
+**3.1 — `posts.js` em ordem decrescente de data.** O array estava do mais antigo para o
+mais novo, e a Tarefa 8 pega "os três primeiros": a home mostraria os três posts mais
+velhos e esconderia o mais recente. Inverta e deixe explícito no topo do arquivo:
+
+```js
+// Ordem é load-bearing: BlogRecente (Tarefa 8) fatia os três primeiros.
+// Mantenha do mais recente para o mais antigo ao adicionar posts.
+```
+
+**3.2 — Comentário sobre fuso na renderização das datas.** `new Date('2025-11-20')` é
+interpretado como meia-noite UTC; formatado em America/Sao_Paulo (UTC−3) imprime
+**19/11/2025**. Todas as datas sairiam um dia antes. Anote acima do array, porque o campo
+é que induz o erro:
+
+```js
+// Datas ISO. Ao formatar, passe timeZone: 'UTC' —
+// toLocaleDateString('pt-BR', { timeZone: 'UTC' }) — senão sai um dia antes.
+```
+
+**3.3 — Telefones ganham o par legível/discável.** A Tarefa 8 precisa do `0800` como
+`<a href="tel:">` e a Tarefa 13 dos telefones das unidades clicáveis. Derivar o href com
+`replace(/\D/g,'')` e prefixo `+55` funciona para fixo (`+554836215050`) e **quebra** no
+0800 (`+5508001505050` não é discável). Regras diferentes a partir de strings de formato
+idêntico é armadilha; guarde as duas formas, como o `whatsapp` já faz:
+
+```js
+// contato.js
+telefone: '0800 150 5050',
+telefoneHref: 'tel:08001505050',
+
+// unidades.js, por unidade
+telefone: '(48) 3621-5050',
+telefoneHref: 'tel:+554836215050',
+```
+
+**3.4 — `redes` vira lista.** Com `instagram` e `facebook` como chaves soltas, o Footer
+(Tarefa 5) e a página de Contato (Tarefa 13) hardcodam rótulo e ícone de cada uma —
+acrescentar um canal depois exigiria editar dois componentes, justamente o que a
+"Pendência declarada" promete que não acontece.
+
+```js
+redes: [
+  { id: 'instagram', rotulo: 'Instagram', url: 'https://www.instagram.com/lideranca.associacao' },
+  { id: 'facebook', rotulo: 'Facebook', url: 'https://www.facebook.com/lidernacaassociacaomatriz/' },
+],
+```
+
+Os componentes ainda mapeiam ícone por `id`, mas com fallback: canal desconhecido
+aparece sem ícone em vez de quebrar.
+
+**3.5 — Documentar o acoplamento dos ids de veículo.** Os quatro ids são chave do
+`PERCENTUAL_POR_TIPO` (Tarefa 9), viram `?tipo=` na URL (Tarefas 6 e 12) e alimentam o
+`find` do resumo (Tarefa 11). Renomear `caminhoes-34` derruba o wizard com "Tipo de
+veículo desconhecido" e apodrece todo link compartilhado. Cabeçalho no arquivo:
+
+```js
+// Os `id` abaixo são load-bearing, não rótulos internos:
+//   - são as chaves de PERCENTUAL_POR_TIPO em dados/calculo.js
+//   - viajam na URL como ?tipo= em /beneficios e /cotacao
+// Renomear um quebra o cálculo da cotação e invalida links já compartilhados.
+// Adicionar um veículo exige adicionar o percentual correspondente em calculo.js.
+```
+
+**3.6 — `descricao` por veículo.** A `chamada` tem seis palavras, dimensionada para o
+card da Tarefa 6. A aba da Tarefa 12 usa a mesma linha como todo o texto corrido da
+página de Benefícios daquele veículo — o resultado seria um painel visivelmente vazio, ou
+um parágrafo escrito direto no `Beneficios.jsx`, que é exatamente o que esta camada
+existe para evitar. Acrescente `descricao` (dois ou três períodos, mesmo tom sóbrio) em
+cada um dos quatro veículos. `chamada` continua nos cards.
+
+**3.7 — `numeros.js`: os números institucionais saem dos componentes.** A Tarefa 6 fixa a
+faixa do hero como "9 anos, +12 unidades, 100% FIPE, 24h" e a Tarefa 13 reaproveita a
+mesma faixa. Dois problemas: o número está escrito no componente, e "+12 unidades"
+contradiz as seis de `unidades.js`. Crie o módulo e faça as duas tarefas lerem dele:
+
+```js
+export const numeros = [
+  { id: 'anos', valor: '9', rotulo: 'anos de história' },
+  { id: 'unidades', valor: '6', rotulo: 'unidades no Sul' },
+  { id: 'fipe', valor: '100%', rotulo: 'da tabela FIPE' },
+  { id: 'assistencia', valor: '24h', rotulo: 'de assistência' },
+]
+```
+
+Mantenha o valor de unidades coerente com `unidades.js`.
+
+**3.8 — Campos menores.** Em `contato.js`, acrescente `mensagemWhatsApp` (o texto
+pré-preenchido que a Tarefa 5 usaria hardcoded) e um `cnpj: ''` vazio como vaga
+declarada para a passada de dados reais. Em `unidades.js`, um comentário na unidade de
+Tubarão apontando que o endereço também aparece em `contato.endereco` e que os dois
+precisam ser atualizados juntos.
+
+**3.9 — Trocar a capa fora de contexto.** O post sobre feira do setor automotivo está
+ilustrado com uma foto de casa iluminada à noite. Escolha uma capa da Unsplash
+compatível com o assunto e confirme que responde 200.
+
+- [ ] **Step 4: Commit**
 
 ```bash
 git add -A

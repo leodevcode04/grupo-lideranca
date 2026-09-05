@@ -1,0 +1,25 @@
+/* Compartilhado entre as etapas do wizard (Tarefa 10, 8.14) — `.titulo` e
+   `.grade` eram byte a byte iguais em `EtapaVeiculo.module.css` e
+   `EtapaDados.module.css`; a Tarefa 11 acrescenta mais dois módulos de
+   etapa, então o que era duplicação em dois lugares vira duplicação em
+   quatro se não sair daqui. `.grade` só traz o que é comum (grid + gap);
+   cada etapa define suas próprias colunas por cima, porque o layout de
+   colunas dos passos diverge de propósito (Tarefa 10, 8.10). */
+
+.titulo {
+  font-size: var(--t-secao);
+  margin-bottom: var(--e-4);
+  /* Alvo de foco na troca de etapa (Tarefa 10, 8.6): compensa o header fixo
+     ao rolar até aqui após uma falha de validação (8.14). */
+  scroll-margin-top: calc(var(--altura-cabecalho) + var(--e-3));
+}
+
+.titulo:focus-visible {
+  outline: 2px solid var(--dourado);
+  outline-offset: 3px;
+}
+
+.grade {
+  display: grid;
+  gap: var(--e-3);
+}

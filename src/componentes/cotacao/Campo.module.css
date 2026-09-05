@@ -1,0 +1,66 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+}
+
+.rotulo {
+  font-size: var(--t-mini);
+  font-weight: 600;
+  color: var(--gelo-suave);
+}
+
+.opcional {
+  font-weight: 400;
+  color: var(--gelo-tenue);
+}
+
+.envolveInput {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.prefixo {
+  position: absolute;
+  left: var(--e-2);
+  color: var(--gelo-suave);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  background: var(--azul-elevado);
+  border: 1px solid var(--azul-borda-forte);
+  border-radius: var(--raio);
+  padding: var(--e-2);
+  color: var(--gelo);
+  transition: border-color var(--transicao);
+  /* Compensa o header fixo quando o foco de um campo inválido (Tarefa 10,
+     8.2) traz a rolagem nativa até aqui. */
+  scroll-margin-top: calc(var(--altura-cabecalho) + var(--e-3));
+}
+
+.comPrefixo {
+  padding-left: calc(var(--e-2) + 1.5rem);
+}
+
+/* A mensagem já diz "campos destacados" (Tarefa 10, 8.8) — a borda vermelha
+   é o destaque que faltava; sem ela o único indicador de erro era o texto
+   abaixo, o que baixa visão varrendo o formulário associa menos à caixa. */
+.comErro {
+  border-color: var(--erro);
+}
+
+/* Sem override de :focus-visible aqui — herda o anel dourado de 2px do
+   `global.css`. O plano pediu "borda dourada no foco", não a remoção do
+   anel (Tarefa 10, 8.8): um campo de formulário deve ter o indicador de
+   foco mais forte da página, não o mais fraco. */
+.input:focus-visible {
+  border-color: var(--dourado);
+}
+
+.mensagemErro {
+  font-size: var(--t-mini);
+  color: var(--erro);
+}

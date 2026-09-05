@@ -2015,7 +2015,7 @@ header fixo.
 Expected: escolher um veículo avança sozinho; deixar campos vazios e clicar em
 Continuar mostra os erros sem trocar de etapa; voltar preserva o preenchido.
 
-- [ ] **Step 8: Correções apontadas na revisão**
+- [x] **Step 8: Correções apontadas na revisão**
 
 O passo 1 é a peça de destaque de verdade: quatro cards fotografados, um clique, sem
 digitação. O passo 2 é um formulário com uma barra de progresso parafusada em cima — e é

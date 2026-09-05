@@ -2,3 +2,19 @@
   padding-top: calc(var(--altura-cabecalho) + var(--e-6));
   padding-bottom: var(--e-7);
 }
+
+.titulo {
+  max-width: 880px;
+  margin-inline: auto;
+  font-size: var(--t-secao);
+  text-align: center;
+}
+
+.subtitulo {
+  max-width: 880px;
+  margin-inline: auto;
+  margin-top: var(--e-2);
+  margin-bottom: var(--e-5);
+  color: var(--gelo-suave);
+  text-align: center;
+}

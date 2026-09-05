@@ -1,4 +1,5 @@
 import { veiculos } from '../../dados/veiculos.js'
+import estilosEtapa from './etapa.module.css'
 import estilos from './EtapaVeiculo.module.css'
 
 // Etapa 1: escolha do tipo de veículo. Cada card é um <button> — não uma
@@ -9,8 +10,10 @@ import estilos from './EtapaVeiculo.module.css'
 export default function EtapaVeiculo({ tipoSelecionado, aoEscolher }) {
   return (
     <div>
-      <h2 className={estilos.titulo}>Qual veículo você quer proteger?</h2>
-      <div className={estilos.grade}>
+      <h2 tabIndex={-1} className={estilosEtapa.titulo}>
+        Qual veículo você quer proteger?
+      </h2>
+      <div className={`${estilosEtapa.grade} ${estilos.grade}`}>
         {veiculos.map((veiculo) => {
           const selecionado = veiculo.id === tipoSelecionado
           return (

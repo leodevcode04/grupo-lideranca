@@ -1,59 +1,37 @@
-.titulo {
-  font-size: var(--t-secao);
-  margin-bottom: var(--e-4);
-}
+/* `.titulo` mora em `etapa.module.css` (compartilhado); `.campo`, `.input`
+   etc. moraram para `Campo.module.css` quando o componente foi extraído
+   (Tarefa 10, 8.13). Este módulo guarda só o que é específico deste
+   passo: a grade de 4 colunas que dá a Marca/Modelo largura igual numa
+   linha e Ano (estreito) / Valor (largo) na outra (Tarefa 10, 8.10) — o
+   `Valor` alimenta `calcularMensalidade` e não pode ficar órfão numa
+   segunda linha sozinho, como no `auto-fit` genérico anterior. */
 
 .grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--e-3);
+  grid-template-columns: repeat(4, 1fr);
 }
 
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e-1);
+.campoMarca,
+.campoModelo {
+  grid-column: span 2;
 }
 
-.rotulo {
-  font-size: var(--t-mini);
-  font-weight: 600;
-  color: var(--gelo-suave);
+.campoAno {
+  grid-column: span 1;
 }
 
-.envolveInput {
-  position: relative;
-  display: flex;
-  align-items: center;
+.campoValor {
+  grid-column: span 3;
 }
 
-.prefixo {
-  position: absolute;
-  left: var(--e-2);
-  color: var(--gelo-suave);
-  pointer-events: none;
-}
+@media (max-width: 640px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
 
-.input {
-  width: 100%;
-  background: var(--azul-elevado);
-  border: 1px solid var(--azul-borda-forte);
-  border-radius: var(--raio);
-  padding: var(--e-2);
-  color: var(--gelo);
-  transition: border-color var(--transicao);
-}
-
-.comPrefixo {
-  padding-left: calc(var(--e-2) + 1.5rem);
-}
-
-.input:focus-visible {
-  outline: none;
-  border-color: var(--dourado);
-}
-
-.mensagemErro {
-  font-size: var(--t-mini);
-  color: var(--erro);
+  .campoMarca,
+  .campoModelo,
+  .campoAno,
+  .campoValor {
+    grid-column: span 1;
+  }
 }

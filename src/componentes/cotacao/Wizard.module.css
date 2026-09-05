@@ -6,13 +6,29 @@
   gap: var(--e-5);
 }
 
+.wizard form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
 .painelFoco {
   position: relative;
   overflow: hidden;
-}
-
-.painelFoco:focus-visible {
-  outline: none;
+  /* O `overflow: hidden` acima corta o anel de foco dos cards colados nas
+     bordas de 880px (Tarefa 10, 8.14). O padding abre respiro para o anel;
+     a margem negativa do mesmo tamanho cancela o padding, então a largura
+     visível do conteúdo não muda. */
+  padding-inline: var(--e-2);
+  margin-inline: calc(var(--e-2) * -1);
+  /* Sem altura mínima, o `popLayout` tira a etapa que sai do fluxo e o
+     contêiner encolhe para a altura da etapa que entra enquanto o conteúdo
+     ainda desliza — Voltar/Continuar saltam ~470px no meio da animação
+     (Tarefa 10, 8.11). O valor cobre a etapa mais alta (os cards do passo
+     1, ~760px em 880px de largura); a Tarefa 11 devolve o `EtapaResumo` a
+     uma altura parecida, então o piso continua servindo.
+  */
+  min-height: 760px;
 }
 
 .somenteLeitor {
@@ -27,6 +43,11 @@
   border: 0;
 }
 
+.tituloProvisorio {
+  font-size: var(--t-secao);
+  margin-bottom: var(--e-4);
+}
+
 .emBreve {
   color: var(--gelo-suave);
 }
@@ -39,4 +60,13 @@
 
 .continuar {
   margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  /* O layout compacto do passo 1 (Tarefa 10, 8.12) é bem mais baixo que o
+     desktop — mantém um piso próprio em vez de herdar os 760px acima, que
+     no mobile sobrariam como espaço vazio abaixo do conteúdo. */
+  .painelFoco {
+    min-height: 520px;
+  }
 }

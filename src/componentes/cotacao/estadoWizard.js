@@ -65,6 +65,13 @@ export function redutor(estado, acao) {
       // anima como retrocesso, não como avanço — é exatamente o bug que um
       // `direcaoRef` preso em `1` da última chamada de `avancar` causaria.
       return { ...estadoInicial, direcao: -1 }
+    case 'irPara':
+      // Usado só pelo aviso de `EtapaResumo` (Tarefa 11) quando alguém entra
+      // direto na última etapa sem `tipo` ou sem os dados da etapa 2 — o
+      // salto é sempre para trás (etapa 0), nunca para a frente, então
+      // `direcao: -1` sem condicional é suficiente; um `avancar`/`voltar`
+      // genérico não serviria porque ambos só andam uma etapa por vez.
+      return { ...estado, etapa: acao.etapa, erros: {}, direcao: -1 }
     default:
       return estado
   }

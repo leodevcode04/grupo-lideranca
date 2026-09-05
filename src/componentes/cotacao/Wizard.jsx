@@ -4,6 +4,8 @@ import Botao from '../ui/Botao.jsx'
 import BarraProgresso from './BarraProgresso.jsx'
 import EtapaVeiculo from './EtapaVeiculo.jsx'
 import EtapaDados from './EtapaDados.jsx'
+import EtapaContato from './EtapaContato.jsx'
+import EtapaResumo from './EtapaResumo.jsx'
 import { ETAPAS, estadoInicial, redutor, validarEtapa } from './estadoWizard.js'
 import estilos from './Wizard.module.css'
 
@@ -163,16 +165,19 @@ export default function Wizard() {
                   aoMudarCampo={aoMudarCampo}
                 />
               )}
-              {estado.etapa >= 2 && (
-                <div>
-                  <h2 tabIndex={-1} className={estilos.tituloProvisorio}>
-                    Quase lá
-                  </h2>
-                  <p className={estilos.emBreve}>
-                    Etapas seguintes do wizard chegam na próxima tarefa.
-                  </p>
-                </div>
+              {estado.etapa === 2 && (
+                <EtapaContato
+                  valores={{
+                    nome: estado.nome,
+                    telefone: estado.telefone,
+                    cidade: estado.cidade,
+                    email: estado.email,
+                  }}
+                  erros={estado.erros}
+                  aoMudarCampo={aoMudarCampo}
+                />
               )}
+              {estado.etapa === 3 && <EtapaResumo estado={estado} despachar={despachar} />}
             </PainelEtapa>
           </AnimatePresence>
         </div>
@@ -183,7 +188,11 @@ export default function Wizard() {
               Voltar
             </Botao>
           )}
-          {estado.etapa !== 0 && (
+          {/* Na última etapa o "Continuar" dá lugar aos botões próprios do
+              resumo (Enviar no WhatsApp / Refazer) — não há mais nada para
+              validar ou avançar, então nenhum botão de formulário aqui
+              precisaria ser `type="submit"` para esta etapa. */}
+          {estado.etapa !== 0 && estado.etapa !== ETAPAS.length - 1 && (
             <Botao variante="primario" tipo="submit" className={estilos.continuar}>
               Continuar
             </Botao>

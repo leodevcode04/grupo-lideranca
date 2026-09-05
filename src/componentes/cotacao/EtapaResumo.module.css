@@ -1,0 +1,89 @@
+.destaque {
+  background: var(--azul-elevado);
+  border: 1px solid var(--azul-borda);
+  border-radius: var(--raio-card);
+  padding: var(--e-4);
+  text-align: center;
+  margin-bottom: var(--e-4);
+}
+
+.nomePlano {
+  font-size: var(--t-mini);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gelo-suave);
+  margin-bottom: var(--e-1);
+}
+
+.valor {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-secao);
+  color: var(--dourado-claro);
+}
+
+.porMes {
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-mini);
+  color: var(--gelo-suave);
+}
+
+.coberturas {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--e-1) var(--e-3);
+  list-style: none;
+  padding: 0;
+  margin-bottom: var(--e-4);
+}
+
+.coberturas li {
+  position: relative;
+  padding-left: var(--e-3);
+  color: var(--gelo-suave);
+}
+
+.coberturas li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--dourado);
+}
+
+.dados {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--e-2) var(--e-3);
+  margin-bottom: var(--e-4);
+}
+
+.dados dt {
+  font-size: var(--t-mini);
+  color: var(--gelo-tenue);
+}
+
+.dados dd {
+  margin: 0;
+}
+
+.aviso,
+.disclaimer {
+  color: var(--gelo-suave);
+  margin-bottom: var(--e-3);
+}
+
+.acoes {
+  display: flex;
+  gap: var(--e-2);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .coberturas,
+  .dados {
+    grid-template-columns: 1fr;
+  }
+
+  .acoes {
+    flex-direction: column;
+  }
+}

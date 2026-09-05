@@ -24,11 +24,14 @@
   /* Sem altura mínima, o `popLayout` tira a etapa que sai do fluxo e o
      contêiner encolhe para a altura da etapa que entra enquanto o conteúdo
      ainda desliza — Voltar/Continuar saltam ~470px no meio da animação
-     (Tarefa 10, 8.11). O valor cobre a etapa mais alta (os cards do passo
-     1, ~760px em 880px de largura); a Tarefa 11 devolve o `EtapaResumo` a
-     uma altura parecida, então o piso continua servindo.
+     (Tarefa 10, 8.11). Remedido depois que a Tarefa 11 acrescentou
+     `EtapaResumo`: a etapa mais alta a 880px de largura passou a ser o
+     resumo (~770px, entre destaque, coberturas, recapitulação e os dois
+     botões), levemente acima dos ~760px dos cards do passo 1 — daí o piso
+     ter subido 20px. Não é um teto: nenhuma etapa fica cortada se crescer
+     além disto, só existe espaço vazio abaixo dela enquanto for mais baixa.
   */
-  min-height: 760px;
+  min-height: 780px;
 }
 
 .somenteLeitor {
@@ -43,15 +46,6 @@
   border: 0;
 }
 
-.tituloProvisorio {
-  font-size: var(--t-secao);
-  margin-bottom: var(--e-4);
-}
-
-.emBreve {
-  color: var(--gelo-suave);
-}
-
 .acoes {
   display: flex;
   justify-content: space-between;
@@ -64,9 +58,14 @@
 
 @media (max-width: 640px) {
   /* O layout compacto do passo 1 (Tarefa 10, 8.12) é bem mais baixo que o
-     desktop — mantém um piso próprio em vez de herdar os 760px acima, que
-     no mobile sobrariam como espaço vazio abaixo do conteúdo. */
+     desktop — mantém um piso próprio em vez de herdar os 780px acima, que
+     no mobile sobrariam como espaço vazio abaixo do conteúdo. `EtapaResumo`
+     empilha em uma coluna no mobile (~1130px, bem acima deste piso) — o
+     piso deste breakpoint segue medido pela etapa mais curta (o passo 1),
+     não pela mais alta, porque é aqui que a variação de altura entre etapas
+     mais incomodaria se o piso fosse alto demais.
+  */
   .painelFoco {
-    min-height: 520px;
+    min-height: 540px;
   }
 }

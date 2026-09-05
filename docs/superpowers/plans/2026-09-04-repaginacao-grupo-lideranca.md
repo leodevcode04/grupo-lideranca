@@ -2590,7 +2590,7 @@ git commit -m "Adiciona página de benefícios com abas por tipo de veículo"
 
 ---
 
-### Task 13: Páginas Quem Somos, Unidades, Blog, Contato e 404
+### Task 13: Páginas Quem Somos, Unidades, Blog, Contato e 404 (revisada)
 
 **Files:**
 - Modify: `src/paginas/QuemSomos.jsx`, `Unidades.jsx`, `Blog.jsx`, `Contato.jsx`, `NaoEncontrada.jsx`
@@ -2649,7 +2649,122 @@ Expected: as cinco páginas carregam com o mesmo sistema visual; a busca de unid
 filtra ao vivo; o filtro de categoria do blog funciona; o formulário de contato acusa
 campos vazios e confirma o envio simulado.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 8: Correções apontadas na revisão**
+
+Veredito: o trabalho de componente é o melhor da tarefa — a mudança do `Campo` para `ui/`, a
+extração do `CardPost` e o retrofit do `Cabecalho` estão limpos. Mas `/blog` e `/unidades`
+se leem como as páginas construídas por último, e cinco defeitos precisam sair antes da
+auditoria da Tarefa 14.
+
+**8.1 — Os alvos de toque de `/unidades` reprovam, e são o ponto da página.** Medidos em
+375×812: os seis links `tel:` têm **118×26px**. Os ícones de rede do `/contato` têm 36×36 e
+os links de canal, 26px de altura. O passo 1 da Tarefa 14 exige 44×44 explicitamente — ou
+seja, é uma lista de reprovações pré-fabricada, justamente no controle que alguém no
+celular quer acertar. Aumente a área clicável sem inchar o visual (padding com margem
+negativa compensando, ou `::after` esticado).
+
+**8.2 — O link de WhatsApp do `/contato` anuncia uma aba nova que ele não abre.** O `<a>`
+traz um texto oculto "(abre em nova aba)" e **não tem `target="_blank"`** — confirmado no
+DOM. Os dois links de rede logo abaixo têm. Pior: o `Botao` já resolve exatamente isso, e
+certo — detecta `^https?:`, põe target e rel, e acrescenta a mesma string para leitor de
+tela. A lista de canais fez a terceira cópia à mão e errou. Passe os canais externos pelo
+`Botao` ou por um link compartilhado, em vez de acrescentar o `target` aqui.
+
+**8.3 — "Enviar outra mensagem" joga o foco no `<body>`.** Depois do envio o foco vai para o
+cartão de confirmação, correto; ao clicar em enviar outra, `document.activeElement` vira
+`document.body`. Toda transição de ida neste arquivo é gerenciada e o único caminho de volta
+não é: quem usa teclado e quer mandar uma segunda mensagem é despejado no início do
+documento. Devolva o foco para dentro do formulário restaurado.
+
+**8.4 — A linha do tempo esconde os anos do leitor de tela, e o comentário que justifica
+está factualmente errado.** O `<span>` do ano leva `aria-hidden="true"`, e o comentário diz
+que "o texto do marco já carrega o sentido cronológico". **Nenhum** dos quatro textos em
+`quemSomos.js` contém o próprio ano. Um leitor de tela recebe "Fundação em Tubarão /
+Expansão pelo litoral catarinense / Chegada ao Rio Grande do Sul / Seis unidades em
+operação" — uma linha do tempo sem tempo.
+
+É exatamente o modo de falha que a correção 6.3 nomeou: comentário confiantemente errado é
+pior que comentário nenhum. Exponha o ano (`<time datetime="2017">`) e corrija o comentário.
+
+**8.5 — Contradição de datas, a terceira do projeto.** O marco 1 é 2017; o marco 4 é 2025 e
+diz "completa nove anos de história" — são oito. O `numeros.js` diz `9 anos`. O título acima
+da linha do tempo diz "Quase uma década". Três afirmações, três aritméticas, na mesma
+página. As correções 5.5 e 6.4 já queimaram o projeto uma vez com "desde 2016 / 9 anos".
+Escolha uma data de fundação e derive tudo dela.
+
+**8.6 — `Revelar` em lista filtrada faz os dois filtros piscarem.** As unidades e os posts
+vêm embrulhados em `Revelar` com `atraso={índice * 90}`. Como os cards são chaveados por
+id, limpar a busca ou voltar para "Todas" **remonta** os que estavam filtrados em
+`opacity: 0`, e eles reaparecem escalonados — até 450ms para a sexta unidade. Reveal de
+scroll é recurso de primeira pintura; num filtro ao vivo lê como travamento. Tire o atraso
+(ou o `Revelar`) quando houver filtro ativo.
+
+**8.7 — O `aria-describedby` da busca aponta para a região viva.** O parágrafo de status é ao
+mesmo tempo a descrição do campo (lida no foco) e o anúncio ao vivo (lido a cada mudança).
+Qualquer trava que se aplique à tagarelice por tecla precisa vir junto de tirar o
+`aria-describedby` desse nó, senão o texto é lido duas vezes.
+
+**8.8 — O cartão de confirmação é a segunda colisão de foco com região viva.** Diferente do
+`aria-live="assertive"` já apontado: o mesmo elemento tem `role="status"` **e** `tabIndex={-1}`
+com um efeito que lhe dá foco. Movimento de foco e anúncio no mesmo tick é precisamente o
+que a correção 8.3 da Tarefa 10 diagnosticou. Como o movimento de foco é deliberado e está
+documentado, tire o `role`.
+
+**8.9 — Três das cinco páginas não usam `Secao`.** `/unidades`, `/blog` e `/contato`
+renderizam `<div className="container">` direto sob o `Cabecalho`. A `/unidades` tem **zero**
+elementos `<section>`. Isso significa sem alternância de `fundo`, sem a prop `ar` de ritmo e
+sem entrada de seção com etiqueta e `<h2>` — os três recursos que a correção 6.6 introduziu
+justamente para o site parar de ler como um campo chapado. O `/quem-somos` usa os três. Dois
+idiomas, mesma tarefa.
+
+**8.10 — Duas respostas diferentes para a mesma pergunta de sumário de títulos.** O `/blog`
+acrescenta um `<h2>` visualmente oculto para os `<h3>` dos posts terem pai; a `/unidades`
+resolve promovendo cada cidade a `<h2>`, ficando com seis irmãos e nenhum título de seção.
+As duas são defensáveis; ter as duas não é.
+
+**8.11 — Conteúdo fino demais para item de menu.** `/blog` são quatro posts em três
+categorias, então "Eventos" e "Institucional" filtram para **um card numa grade de três
+colunas** — filtro cujo resultado mais comum é uma fileira quase vazia. `/unidades` são seis
+cards atrás de uma busca. Quem clica em todos os itens do menu conclui que o site é uma home
+com satélites.
+
+Medido em 1440×900, altura de conteúdo entre o cabeçalho e o rodapé: home 7061px, quem somos
+2737, benefícios 1637, contato 1023, blog 794, **unidades 770** — com um cabeçalho de 495px,
+ou seja, a foto decorativa é 64% de tudo que a página tem a dizer.
+
+Correção mais barata: **8 a 10 posts e 10 a 12 unidades** em `src/dados/`. O plano já
+prevê que o conteúdo real entra editando só essa pasta, então não custa nada
+estruturalmente e é a coisa de maior alavancagem antes da Tarefa 14. Dê também à `/unidades`
+um fechamento — hoje ela termina no sexto card.
+
+**8.12 — Ajustes menores.**
+
+- Cinco cópias byte a byte do utilitário de texto visualmente oculto (`Wizard`, `Botao`,
+  `Beneficios`, e agora `Blog` e `Contato`). Mesma decisão "mover um arquivo ou copiar" da
+  8.13. Vai para o `global.css`.
+- `posts[].capa` virou dado morto: nada lê o campo desde a reescrita 7.7, e uma das quatro
+  URLs agora também é a foto de cabeçalho do Benefícios. Apague ou documente.
+- `Contato.jsx` com 241 linhas faz coisas demais: regras de validação, estado, dois efeitos
+  de foco, uma lista de canais montada à mão com três idiomas de link, e o cartão de
+  confirmação. A lista de canais é apresentação estática sem estado — extraia, e o defeito
+  8.2 deixa de ser possível.
+- `Cabecalho.jsx` tem um id de DOM fixo sem consumidor; dois cabeçalhos na mesma página
+  duplicariam. Mesma forma que a 4.10 apontou no `Abas`. Use `useId` ou remova.
+- O `useId` do status do `/blog` não é referenciado por nada.
+- O campo de telefone do `/contato` passa `erro={erros.telefone}`, mas a validação nunca
+  define esse erro. E `name="tel"` está errado: `tel` é o token de *autocomplete*; o nome do
+  campo é `telefone`.
+- O `✓` do cartão de confirmação é glifo cru. A correção 6.9 já determinou que glifos
+  sobreviventes viram SVG inline, "como o `Estrelas` já faz".
+- O `NaoEncontrada.module.css` define `--t-hero` e imediatamente sobrescreve com um `clamp`
+  literal — o token vira código morto e o passo 6 pedia `--t-hero`.
+- O `.selo` da `/unidades` usa padding literal em `em` em vez dos tokens `--e-*`.
+- Lages aparece em `unidades.js` e em nenhum marco da linha do tempo, que termina contando
+  seis unidades depois de explicar cinco.
+- Dois blocos ficaram com a indentação antiga depois de ganharem um pai novo
+  (`Beneficios.jsx` e `Contato.jsx`).
+
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A

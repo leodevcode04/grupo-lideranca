@@ -1,0 +1,12 @@
+.medida {
+  --secao-medida: 720px;
+}
+
+/* Coluna de 860px pedida no passo 3 — separada da medida do cabeçalho
+   (`--secao-medida` acima), que é mais estreita de propósito: título e
+   acordeão não precisam ter a mesma largura de leitura. */
+.container {
+  max-width: 860px;
+  width: 100%;
+  margin-inline: auto;
+}

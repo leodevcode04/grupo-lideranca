@@ -1,0 +1,76 @@
+.acordeao {
+  display: flex;
+  flex-direction: column;
+}
+
+/* `+ .item` em vez de excluir `:last-child`: não há grade aqui para quebrar
+   linha, mas o item já vem embrulhado pelo `Revelar` (que soma sua própria
+   classe), então marcar o divisor pela adjacência em vez de por posição
+   evita qualquer surpresa se a lista for filtrada ou reordenada por fora. */
+.item + .item {
+  border-top: 1px solid var(--azul-borda);
+}
+
+.cabecalhoTitulo {
+  margin: 0;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  width: 100%;
+  padding-block: var(--e-3);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--gelo);
+  font: inherit;
+}
+
+.pergunta {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  font-weight: 400;
+  transition: color var(--transicao);
+}
+
+@media (hover: hover) {
+  .cabecalho:hover .pergunta {
+    color: var(--dourado-claro);
+  }
+}
+
+.sinal {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--e-4);
+  height: var(--e-4);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--dourado);
+  transition: transform var(--transicao);
+}
+
+.sinalAberto {
+  transform: rotate(45deg);
+}
+
+.painel {
+  overflow: hidden;
+}
+
+.painelConteudo {
+  padding-bottom: var(--e-4);
+  max-width: 68ch;
+}
+
+.resposta {
+  margin: 0;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}

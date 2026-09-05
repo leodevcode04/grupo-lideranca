@@ -1,0 +1,64 @@
+.medida {
+  --secao-medida: 640px;
+}
+
+/* Halo dourado atrás do conteúdo: mesmo padrão de isolamento do `.grao`
+   global (position:relative + overflow:hidden + isolation:isolate), mas com
+   um gradiente radial dourado no lugar do ruído — é a última seção antes do
+   rodapé, a única com esse tratamento. */
+.halo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.halo::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 35%, rgba(198, 160, 74, 0.32), transparent 60%);
+  pointer-events: none;
+}
+
+/* `.container` aqui é a classe global de `global.css`, o wrapper que o
+   próprio `Secao` renderiza em torno dos filhos — este módulo não tem
+   acesso ao `estilos.container` interno do `Secao` (escopos diferentes), e
+   `:global()` é o único jeito de erguer o conteúdo acima do halo sem alterar
+   o componente. Sem isto o `::before` pintaria por cima: um bloco em-fluxo
+   não-posicionado pinta ANTES de um descendente posicionado com
+   z-index:auto/0 do mesmo ancestral, mesmo vindo depois no DOM (CSS2.1,
+   ordem de pintura). */
+.halo :global(.container) {
+  position: relative;
+  z-index: 1;
+}
+
+.conteudo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-5);
+  text-align: center;
+}
+
+.telefone {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-hero);
+  color: var(--dourado-claro);
+  text-decoration: none;
+  transition: color var(--transicao);
+}
+
+@media (hover: hover) {
+  .telefone:hover {
+    color: var(--dourado);
+  }
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--e-3);
+}

@@ -2396,7 +2396,7 @@ git commit -m "Conclui o wizard de cotação com contato e resumo"
 
 ---
 
-### Task 12: Página de Benefícios com abas
+### Task 12: Página de Benefícios com abas (revisada)
 
 **Files:**
 - Create: `src/componentes/ui/Abas.jsx` + `.module.css`
@@ -2435,7 +2435,153 @@ Expected: `/beneficios?tipo=motos` abre já na aba de motos; trocar de aba muda 
 o conteúdo com transição; as setas do teclado navegam entre as abas; em 375px a régua de
 abas rola na horizontal.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Correções apontadas na revisão**
+
+Veredito: consolidar as quatro páginas era a decisão certa, mas do jeito que ficou a página
+mostra um veículo por vez e esconde os outros três — exatamente o que as quatro páginas
+separadas faziam. Ela paga o custo das abas (conteúdo oculto, sem busca na página entre
+veículos, maquinaria de ARIA) e não recolhe o benefício, que é **comparação**.
+
+**4.1 — `AnimatePresence mode="wait"` trava o painel indefinidamente.** É o mesmo bug que o
+wizard já diagnosticou e corrigiu — está documentado no próprio `Wizard.jsx`: o `"wait"` só
+monta o painel novo quando a animação de saída termina, o que depende de um callback de
+`requestAnimationFrame`; se o rAF não dispara, a troca trava.
+
+Reproduzido: clicar em "Motos" atualiza o `aria-selected` da aba, mas o `[role=tabpanel]`
+continua sendo o de carros, congelado em `opacity: 0` — conteúdo velho e invisível, para
+sempre. Isolado por contraste: o wizard, com `sync`, avança na hora.
+
+Não é só artefato do ambiente de teste: qualquer estagnação de rAF (aba em segundo plano,
+economia de energia) congela o painel em branco. Use o `sync` padrão, como o wizard.
+
+Corrija junto o comentário do `Abas.jsx` que afirma que "uma troca nova interrompe a
+animação de saída em andamento em vez de empilhar" — com `mode="wait"` isso é exatamente
+falso. E uma primitiva de `ui/` sem domínio não deveria documentar o `AnimatePresence` de
+quem a chama.
+
+**4.2 — Link direto para uma aba distante não mostra aba selecionada no mobile.** Nada
+rola a aba ativa para dentro da faixa. Medido em 375×812 abrindo
+`/beneficios?tipo=caminhoes-pesados`: `scrollLeft` 0, a aba ativa fica de 426 a 629 e a
+faixa vai de 20 a 355 — **completamente fora da tela**. O usuário vê "Carros | Motos |
+Caminhões 3/4" com nada aparentando estar selecionado, acima de um painel sobre caminhão
+pesado. É o caminho exato dos cards da home, no aparelho que a correção 8.12 estabeleceu
+como o principal desse tráfego.
+
+Resolva dentro do `Abas`, que é quem tem o contêiner de rolagem: role a aba ativa para a
+vista na montagem e a cada mudança de `ativo`.
+
+**4.3 — O `overflow-x: auto` corta o anel de foco e deixa a faixa rolável na vertical.**
+`overflow-x: auto` faz o `overflow-y` computar como `auto`, não `visible`. Medido em 375px:
+`clientHeight` 58 contra `scrollHeight` 59 — 1px de transbordo vertical, que é justamente o
+indicador em `bottom: -1px`. E o anel de foco (2px com 3px de offset) se estende 5px para
+fora de um botão que já preenche a faixa verticalmente: **cortado nos dois eixos**. Mesma
+classe do defeito 8.14. Depois de corrigir, confirme que `scrollHeight === clientHeight`.
+
+**4.4 — `align-items: start` anula a grade do painel: 207px de espaço morto sob a foto.** O
+`grid-template-areas` faz a foto atravessar as três linhas da coluna e o `.foto` declara
+`height: 100%` — mas o `align-items: start` impede o wrapper de esticar, então o `100%`
+resolve contra uma caixa de altura automática e o `min-height: 320px` vira a altura real.
+Medido em 1440×1000: painel com 581px, foto com 320px, imagem em 560×320 (um letterbox
+1.75:1), 207px de vazio embaixo.
+
+Trocando para `stretch` ao vivo: wrapper e imagem passam a 581px — a "foto grande" que o
+plano pediu. Uma palavra. Hoje a grade que atravessa linhas e o `height: 100%` são
+decoração inerte, e a composição no desktop é um letterbox atarracado boiando numa coluna
+meio vazia. Mesma família da correção 5.1.
+
+**4.5 — A grade de coberturas impede a comparação, que é o trabalho da página.** A união
+entre os quatro veículos é de **11** coberturas: cinco universais (roubo e furto, colisão e
+perda total, incêndio, rastreador, assistência 24h) e seis diferenciadoras (fenômenos
+naturais, carro reserva, vidros e retrovisores, guincho especializado, guincho pesado,
+cobertura de carreta).
+
+Hoje: todo item recebe o mesmo check dourado, sem marcar o que é exclusivo daquele veículo;
+**a ausência é invisível** — quem olha Motos não tem como descobrir que carro reserva e
+vidros existem para carros e não para motos, que é o fato mais decisivo da página; e nem os
+cinco universais ficam parados, porque listas de 8/7/6/7 itens numa grade de duas colunas
+em ordem de linha deslocam as células a cada troca (rastreador é linha 3 coluna 2 nos
+carros, linha 3 coluna 1 nas motos, linha 2 coluna 2 nos dois caminhões). Nada fica firme
+sob o crossfade, então nada pode ser comparado.
+
+A única forma de responder "o que eu perco protegendo a moto em vez do carro?" é trocar de
+aba e segurar oito strings na memória — que é exatamente o que as quatro páginas forçavam.
+
+**Duas camadas, ambas aprovadas com o usuário:**
+
+1. **Grade de união em toda aba.** Calcule a união uma vez e renderize as 11 linhas em todos
+   os painéis: presentes com o check dourado, **ausentes** em `--gelo-suave` de baixa ênfase
+   com um traço no lugar do check, e as exclusivas do veículo ativo com uma marca discreta.
+   A posição passa a ser estável entre abas, a ausência fica visível, e o crossfade ganha
+   algo que significa alguma coisa.
+2. **Tabela comparativa 11×4 abaixo do painel.** É pequena, cabe no registro sóbrio da
+   direção visual melhor que qualquer outra coisa da página, dá a ela uma segunda silhueta
+   (falta apontada em 4.7) e é o que torna a consolidação uma decisão de projeto em vez de
+   uma troca de URL. As abas passam a fazer o que abas fazem bem — detalhe sob demanda — e a
+   tabela carrega a comparação.
+
+**4.6 — `sizes` não bate com o breakpoint, repetindo 7.5.** O JSX declara
+`(max-width: 768px) 100vw, 640px`, mas o painel colapsa para uma coluna em **900px**. Medido:
+em 800px a imagem renderiza 705px contra 640 declarados; em 900px, 795px contra 640 — 1,24×
+subdimensionada. Toda a faixa de 769 a 900px, que é a maioria dos tablets e celulares
+grandes em retrato. Alinhe os dois números.
+
+**4.7 — `loading="lazy"` na imagem LCP.** Em 1440×1000 a foto do painel começa em y=520,
+dentro da primeira tela. Adiar por lazy uma imagem que está na viewport custa LCP de forma
+confiável. A correção 5.7 defendeu `lazy` para capas **abaixo da dobra**; esta está acima em
+todo tamanho de desktop. Tire aqui e considere `fetchpriority="high"`.
+
+**4.8 — O `<h2>` é 100% redundante com a aba selecionada.** Ele renderiza o nome do veículo
+como primeira coisa sob uma faixa cuja aba selecionada diz exatamente aquela string, uns
+40px acima — e o painel já é `aria-labelledby` daquela aba. O título é necessário para a
+estrutura do documento, mas deveria **dizer alguma coisa**: o nome do veículo é a única
+palavra que o leitor já tem. Mesma observação da 6.5. Leve a `chamada` para o `<h2>`.
+
+**4.9 — Adotar o `Cabecalho` na Tarefa 13, não aqui.** Decidido com o usuário. A Tarefa 13
+constrói o `Cabecalho` (foto, gradiente, ~55vh) "usado por todas as páginas internas". O
+Benefícios acabou de ganhar um cabeçalho próprio e mais fraco — título centralizado em
+`--t-secao`, sem foto, sem etiqueta, com folga de header escrita à mão.
+
+Já existem **três** mecanismos de folga de header no projeto (aqui, no `Cotacao.module.css`
+e no `.secao:first-child`), mais a variante sangrada do hero. Deixar a Tarefa 13 criar um
+quarto deixaria cinco páginas internas com cabeçalho de foto e duas com bloco de texto
+centralizado, que é pior que qualquer das duas escolhas.
+
+**Acrescente à Tarefa 13 um passo explícito**: depois de construir o `Cabecalho`, adotá-lo
+em `/beneficios` e apagar a cópia da regra `padding-top: calc(--altura-cabecalho + --e-6)`
+daqui. O `/cotacao` fica de fora por decisão — é superfície de tarefa, onde o wizard é o
+conteúdo, e um cabeçalho de 55vh com foto atrapalharia.
+
+**4.10 — Ajustes menores.**
+
+- O `idPrefixo` tem valor padrão constante (`'abas'`), então o fallback de `useId` é código
+  morto e duas instâncias padrão na mesma página emitiriam ids duplicados. Reveladoramente,
+  o `layoutId` usa o id por instância e os ids do DOM não — a assimetria é o bug. Deixe o
+  padrão `undefined` e o `useId` vence.
+- `tabIndex={0}` num painel que contém elemento focável (o CTA). O padrão APG só pede isso
+  quando o painel **não** tem nada focável; é parada de tabulação redundante.
+- Faltam as teclas `Home` e `End`. A lista de teclas do padrão de abas é curta e o `Abas`
+  implementa duas das quatro — barato de terminar enquanto a primitiva é nova.
+- A lista de coberturas quebra mal no mobile: em 375px a grade continua com duas colunas de
+  156px e três de sete itens quebram em duas linhas — inclusive "Roubo e furto", com 13
+  caracteres. Com `align-items: center` o check dourado fica ao lado do **meio** de um rótulo
+  de duas linhas. Passe a uma coluna abaixo de ~480px e use `align-items: start`.
+- `botoesRef.current` nunca é podado, acumulando refs de itens removidos.
+- `useMemo(..., [])` sobre uma constante de módulo é cerimônia; hoiste.
+- A foto de `caminhoes-pesados` não lê como caminhão: em 560×320 sob `grayscale(1)` vira uma
+  textura escura abstrata. Vale outro enquadramento.
+- Já são **quatro** blocos de `console.warn` de desenvolvimento à mão (`Botao`, `Secao`,
+  `Acordeao`, `Abas`). Uma função única em `ui/` é dedupe real, sem superfície de API nova —
+  diferente do card compartilhado que foi recusado.
+- O fallback literal `'carros'` duplica um id load-bearing; use o primeiro item de
+  `veiculos`.
+- O helper de largura de imagem da Unsplash está na **segunda** cópia (a primeira é no
+  `TiposVeiculo.jsx`, e o comentário admite). É a situação "mover um arquivo ou copiar" da
+  8.13, não abstração prematura. Extraia.
+- **Nota para a Tarefa 13:** as pílulas de categoria do Blog **não** são abas. Não há painel,
+  e uma grade de posts não é rotulada por uma pílula. Não use o `Abas` lá — sairia
+  `role="tab"` em botão de filtro e `aria-controls` apontando para uma grade.
+
+- [ ] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -2455,6 +2601,16 @@ git commit -m "Adiciona página de benefícios com abas por tipo de veículo"
 Cabeçalho interno das páginas: props `etiqueta`, `titulo`, `texto` e `foto` opcional.
 Altura de cerca de 55vh, com o mesmo tratamento de foto e gradiente do hero, porém mais
 contido. Usado por todas as páginas internas, o que dá unidade sem repetir código.
+
+- [ ] **Step 1b: Adotar o `Cabecalho` no Benefícios (retrofit da Tarefa 12)**
+
+Decidido com o usuário na revisão da Tarefa 12. Depois de construir o `Cabecalho`, adote-o
+em `/beneficios`, que hoje tem cabeçalho próprio e mais fraco — título centralizado em
+`--t-secao`, sem foto, sem etiqueta. Apague a cópia da regra
+`padding-top: calc(var(--altura-cabecalho) + var(--e-6))` do `Beneficios.module.css`.
+
+O `/cotacao` fica **de fora** por decisão: é superfície de tarefa, onde o wizard é o
+conteúdo, e um cabeçalho de 55vh com foto atrapalharia.
 
 - [ ] **Step 2: `QuemSomos`**
 

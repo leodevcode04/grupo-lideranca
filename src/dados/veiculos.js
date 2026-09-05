@@ -53,3 +53,33 @@ export const veiculos = [
     ],
   },
 ]
+
+// União das coberturas dos quatro veículos, calculada uma vez, para a página
+// de Benefícios (Tarefa 12, 4.5): universais primeiro (presentes nos quatro),
+// depois as diferenciadoras (presentes em só alguns) — cada grupo na ordem em
+// que aparece pela primeira vez percorrendo os veículos. Isso mantém a
+// posição de cada cobertura estável entre abas, o que é o próprio ponto da
+// correção: sem uma grade de união, a ausência de um item fica invisível e os
+// itens compartilhados ainda deslocam de célula a cada troca de aba.
+const contagemPorCobertura = new Map()
+for (const veiculo of veiculos) {
+  for (const cobertura of veiculo.coberturas) {
+    contagemPorCobertura.set(cobertura, (contagemPorCobertura.get(cobertura) || 0) + 1)
+  }
+}
+
+const vistas = new Set()
+const universais = []
+const diferenciadoras = []
+for (const veiculo of veiculos) {
+  for (const cobertura of veiculo.coberturas) {
+    if (vistas.has(cobertura)) continue
+    vistas.add(cobertura)
+    const grupo =
+      contagemPorCobertura.get(cobertura) === veiculos.length ? universais : diferenciadoras
+    grupo.push(cobertura)
+  }
+}
+
+export const coberturasUniao = [...universais, ...diferenciadoras]
+export const coberturasUniversais = new Set(universais)

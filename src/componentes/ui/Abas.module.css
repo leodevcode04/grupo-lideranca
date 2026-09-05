@@ -45,6 +45,18 @@
 @media (max-width: 640px) {
   .tablist {
     overflow-x: auto;
+    /* `overflow-x: auto` sozinho faz `overflow-y` computar como `auto`
+       também (é o par, não `visible`), transformando a faixa num contêiner
+       de rolagem no eixo vertical. Sem folga ali, o indicador (`bottom:
+       -1px`) e o anel de foco (2px + 3px de offset, 5px para fora do botão)
+       ficam parcialmente fora da caixa de conteúdo e são cortados nos dois
+       eixos (Tarefa 12, 4.3). `overflow-y: hidden` é permitido lado a lado
+       com `overflow-x: auto` — a conversão para `auto` só acontece quando um
+       dos dois é `visible` — e o padding-block abaixo dá espaço para o
+       indicador e o anel caberem sem que a faixa precise rolar no eixo Y.
+       Confirme depois: `scrollHeight === clientHeight`. */
+    overflow-y: hidden;
+    padding-block: var(--e-1);
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }

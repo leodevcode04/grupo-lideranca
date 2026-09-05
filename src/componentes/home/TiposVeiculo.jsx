@@ -2,18 +2,11 @@ import { Link } from 'react-router-dom'
 import Secao from '../ui/Secao.jsx'
 import Revelar from '../ui/Revelar.jsx'
 import { veiculos } from '../../dados/veiculos.js'
+import { comLargura } from '../../utils/imagem.js'
 import estilos from './TiposVeiculo.module.css'
 
-// Adiciona largura e formato à URL da Unsplash sem duplicar a query inteira
-// por variante — usado para montar o srcset abaixo. Essas quatro fotos estão
-// abaixo da dobra: ganham `loading="lazy"`, ao contrário da do Hero.
-function comLargura(url, largura) {
-  const u = new URL(url)
-  u.searchParams.set('w', largura)
-  u.searchParams.set('fm', 'webp')
-  u.searchParams.set('auto', 'format')
-  return u.toString()
-}
+// Essas quatro fotos estão abaixo da dobra: ganham `loading="lazy"`, ao
+// contrário da do Hero.
 
 export default function TiposVeiculo() {
   return (

@@ -35,7 +35,14 @@
     'foto coberturas'
     'foto cta';
   gap: var(--e-6);
-  align-items: start;
+  /* `start` anulava a própria grade (Tarefa 12, 4.4): `.fotoWrapper`
+     atravessa as três linhas da coluna e `.foto` tem `height: 100%`, mas com
+     `align-items: start` o wrapper nunca esticava para preencher a coluna —
+     o `100%` resolvia contra uma altura automática, e o `min-height: 320px`
+     virava a altura real (581px de painel, foto de 320px, 207px de vazio
+     embaixo). `stretch` faz o wrapper (e a imagem) ocuparem a altura inteira
+     da coluna. */
+  align-items: stretch;
 }
 
 .fotoWrapper {
@@ -63,17 +70,14 @@
   gap: var(--e-2);
 }
 
+/* Carrega a `chamada` do veículo agora (Tarefa 12, 4.8) — o nome já está na
+   aba selecionada, ~40px acima, e repeti-lo aqui não dizia nada de novo.
+   Mantém o peso de título (fonte, tamanho) e ganha a cor dourada que
+   antes marcava a `chamada` como um texto à parte. */
 .nome {
   margin: 0;
   font-family: var(--fonte-titulo);
   font-size: var(--t-card);
-  color: var(--gelo);
-}
-
-.chamada {
-  margin: 0;
-  font-family: var(--fonte-titulo);
-  font-size: var(--t-corpo);
   color: var(--dourado-claro);
 }
 
@@ -107,8 +111,32 @@
   display: flex;
   align-items: center;
   gap: var(--e-1);
-  color: var(--gelo);
   font-size: var(--t-corpo);
+  padding: var(--e-1);
+  border-radius: var(--raio);
+}
+
+/* Três estados (Tarefa 12, 4.5) — a grade renderiza as 11 coberturas da
+   união em toda aba, então cada linha precisa dizer se o veículo ativo tem
+   aquele item, não tem, ou tem como diferencial só dele:
+   - presente: check dourado, texto na cor normal — o que já existia.
+   - ausente: traço em vez de check, texto em `--gelo-suave` (o mesmo tom já
+     usado como corpo de texto em outras páginas, então já passa AA) — baixa
+     ênfase, mas nunca invisível.
+   - exclusiva: presente E diferenciadora (não uma das cinco universais) —
+     recebe um realce discreto (fundo dourado bem translúcido) para separar
+     "isto é comum a todos" de "isto é o que este veículo tem a mais". */
+.presente {
+  color: var(--gelo);
+}
+
+.ausente {
+  color: var(--gelo-suave);
+}
+
+.exclusiva {
+  color: var(--gelo);
+  background: rgba(var(--dourado-rgb), 0.12);
 }
 
 .check {
@@ -116,6 +144,30 @@
   width: 1.25rem;
   height: 1.25rem;
   color: var(--dourado);
+}
+
+.traco {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--gelo-suave);
+}
+
+/* Compartilhado com `Botao.module.css` — mesmo padrão de esconder
+   visualmente sem tirar da árvore de acessibilidade. */
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .cta {
@@ -132,4 +184,86 @@
       'coberturas'
       'cta';
   }
+}
+
+/* Abaixo de ~480px a grade de duas colunas de 156px quebra mal: rótulos de
+   duas linhas (ex. "Roubo e furto") com `align-items: center` deixam o check
+   dourado ao lado do meio do texto, não da primeira linha (Tarefa 12, 4.10).
+   Uma coluna e alinhamento no topo resolvem os dois problemas juntos. */
+@media (max-width: 480px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+
+  .item {
+    align-items: start;
+  }
+}
+
+/* Tabela comparativa 11×4 (Tarefa 12, 4.5, segunda camada). */
+.comparativo {
+  margin-top: var(--e-7);
+}
+
+.comparativoTitulo {
+  margin: 0 0 var(--e-3);
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  color: var(--gelo);
+  text-align: center;
+}
+
+.tabelaRolagem {
+  /* Rolagem contida aqui, não na página — uma tabela de 5 colunas em 375px
+     não deve empurrar o body na horizontal. `overflow-x: auto` sozinho não
+     bastou: a tabela larga (min-width: 640px) ainda inflava o
+     `scrollWidth` do documento (medido: 578px de overflow em 375px de
+     viewport, cabeçalho fixo incluído, que usa `inset-inline: 0` e passou a
+     computar a própria largura contra esse overflow). `contain: layout`
+     força o isolamento de layout que faltava — depois dele, `scrollWidth`
+     do documento volta a bater com `clientWidth`. */
+  overflow-x: auto;
+  contain: layout;
+}
+
+.tabela {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: var(--t-mini);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--e-1) var(--e-2);
+  text-align: center;
+  border-bottom: 1px solid var(--azul-borda);
+  white-space: nowrap;
+}
+
+.tabela thead th {
+  color: var(--gelo-suave);
+  font-family: var(--fonte-corpo);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tabela tbody th {
+  text-align: left;
+  font-weight: 400;
+  color: var(--gelo);
+  white-space: normal;
+}
+
+.tabela td {
+  color: var(--gelo);
+}
+
+.tabela .check {
+  display: inline-block;
+}
+
+.celulaAusente {
+  color: var(--gelo-suave);
 }

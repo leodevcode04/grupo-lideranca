@@ -3,11 +3,7 @@
   flex-direction: column;
 }
 
-/* `+ .item` em vez de excluir `:last-child`: não há grade aqui para quebrar
-   linha, mas o item já vem embrulhado pelo `Revelar` (que soma sua própria
-   classe), então marcar o divisor pela adjacência em vez de por posição
-   evita qualquer surpresa se a lista for filtrada ou reordenada por fora. */
-.item + .item {
+.item:not(:first-child) {
   border-top: 1px solid var(--azul-borda);
 }
 
@@ -67,10 +63,6 @@
 .painelConteudo {
   padding-bottom: var(--e-4);
   max-width: 68ch;
-}
-
-.resposta {
-  margin: 0;
   color: var(--gelo-suave);
   font-size: var(--t-corpo);
 }

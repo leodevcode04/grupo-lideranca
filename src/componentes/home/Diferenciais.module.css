@@ -2,30 +2,51 @@
   --secao-medida: 720px;
 }
 
-.grade {
+/* Layout assimétrico (Tarefa 8, 7.9): cabeçalho preso numa coluna à
+   esquerda, itens empilhados numa coluna à direita, ~5/7 — quebra a
+   monotonia de "cabeçalho em cima, grade embaixo" repetida nas outras sete
+   seções. `:global(.container)` é o wrapper que o próprio `Secao` sempre
+   renderiza (cabeçalho como primeiro filho, `children` como segundo); virar
+   esse flex-column em grid de duas colunas encaixa os dois nos lugares
+   certos sem o `Secao` precisar saber disso. */
+.assimetrico :global(.container) {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--e-4);
+  grid-template-columns: 5fr 7fr;
+  gap: var(--e-7);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .assimetrico :global(.container) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Lista vertical, não grade: a coluna direita já é estreita (7/12 de
+   1280px), e dividir em mais colunas ali repetiria a grade idêntica que
+   esta seção deveria quebrar. Filetes horizontais no lugar dos verticais
+   fazem o mesmo trabalho de separação. */
+.grade {
+  display: flex;
+  flex-direction: column;
 }
 
 .item {
   display: flex;
   flex-direction: column;
   gap: var(--e-2);
-  padding-inline-end: var(--e-4);
-  border-inline-end: 1px solid var(--azul-borda);
+  padding-block: var(--e-4);
+  border-bottom: 1px solid var(--azul-borda);
+}
+
+.item:first-child {
+  padding-top: 0;
 }
 
 .item:last-child {
-  padding-inline-end: 0;
-  border-inline-end: none;
+  padding-bottom: 0;
+  border-bottom: none;
 }
-
-/* Sem numeral fantasma (01–04): 52px em Fraunces com opacity: .25 é o mesmo
-   corpo e família do <h2> da seção, 30px ao lado — grande demais para
-   rótulo, pequeno demais para arquitetura (Tarefa 7, 6.8). Os filetes de
-   1px entre colunas já fazem o trabalho de separar os quatro itens; não
-   precisam de reforço. */
 
 .titulo {
   margin: 0;
@@ -38,38 +59,4 @@
   margin: 0;
   color: var(--gelo-suave);
   font-size: var(--t-corpo);
-}
-
-/* Grade 2x2 abaixo de 900px: mesma armadilha do FaixaNumeros (Tarefa 6, 5.3)
-   — :last-child não enxerga quebra de linha do grid, então o item 2 (fim da
-   primeira linha) manteria o divisor à direita, pendurado no vazio. */
-@media (max-width: 900px) {
-  .grade {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .item:nth-child(2n) {
-    padding-inline-end: 0;
-    border-inline-end: none;
-  }
-}
-
-/* Coluna única abaixo de 640px: o divisor vertical não faz sentido entre
-   linhas — vira um filete horizontal separando os itens empilhados. */
-@media (max-width: 640px) {
-  .grade {
-    grid-template-columns: 1fr;
-  }
-
-  .item {
-    padding-inline-end: 0;
-    border-inline-end: none;
-    padding-bottom: var(--e-4);
-    border-bottom: 1px solid var(--azul-borda);
-  }
-
-  .item:last-child {
-    padding-bottom: 0;
-    border-bottom: none;
-  }
 }

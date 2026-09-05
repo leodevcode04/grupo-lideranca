@@ -11,7 +11,7 @@ export default function Diferenciais() {
       ar="amplo"
       etiqueta="Por que o Grupo Liderança"
       titulo="O que muda quando você é associado"
-      className={estilos.medida}
+      className={`${estilos.medida} ${estilos.assimetrico}`}
     >
       <div className={estilos.grade}>
         {diferenciais.map((item, indice) => (

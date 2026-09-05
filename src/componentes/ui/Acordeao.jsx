@@ -1,39 +1,61 @@
 import { useId, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import Revelar from './Revelar.jsx'
 import estilos from './Acordeao.module.css'
 
-// Peça de UI sem domínio: qualquer lista de `{ id, pergunta, resposta }`
-// serve. Um item aberto por vez — abrir um fecha o outro, mas cada item
-// anima sua própria altura de forma independente (dois `motion.div`
-// distintos, cada um só reage à própria prop `isOpen`), então não há duas
-// animações competindo pelo mesmo elemento.
+// Peça de UI sem domínio: qualquer lista de `{ id, titulo, conteudo }` serve
+// — `conteudo` aceita string ou nó (lista, link, etc.), não só texto. Um item
+// aberto por vez — abrir um fecha o outro, mas cada item anima sua própria
+// altura de forma independente (dois `motion.div` distintos, cada um só
+// reage à própria prop `isOpen`), então não há duas animações competindo
+// pelo mesmo elemento.
 //
 // `height: 'auto'` é a armadilha clássica de acordeão: o Framer mede o
 // valor de destino e anima até ele, e ao terminar deixa o estilo como
 // `height: 'auto'` de verdade (não um pixel congelado) — por isso um
-// resize com o painel aberto e em repouso continua correto. O risco real
-// é composto por dois cuidados que este componente toma:
-//   1. `overflow: hidden` fica ligado durante toda a animação (senão o
-//      conteúdo vaza da caixa que ainda está crescendo/encolhendo), e só
-//      volta a `visible` depois que a abertura termina de verdade
-//      (`onAnimationComplete`) — isso é o que salva o anel de foco de um
-//      link dentro da resposta caso um dia seja adicionado: hoje as
-//      respostas são texto puro, então nada foca ali, mas se um link
-//      entrar, o foco não fica cortado enquanto o painel está assentado.
-//   2. `alternar` zera esse estado "assentado" a cada clique, antes de
-//      trocar `aberto` — sem isso, reabrir um item que já tinha ficado
-//      assentado uma vez deixaria `overflow: visible` ligado desde o
-//      primeiro quadro da nova animação, e o conteúdo vazaria da caixa
-//      enquanto ela ainda estava crescendo.
-export default function Acordeao({ itens, abertoInicial = null, tituloComo: TituloTag = 'h3', className }) {
+// resize com o painel aberto e em repouso continua correto.
+//
+// Altura zero com `overflow: hidden` NÃO poda a subárvore da acessibilidade
+// (Tarefa 8, 7.1): um painel fechado com `height: 0` continua com
+// `visibility: visible` por padrão, e um leitor de tela lê o conteúdo dele
+// mesmo que nada apareça na tela. Por isso cada painel rastreia o próprio
+// `assentado` (a animação para o `isOpen` atual já terminou) e, só então,
+// aplica `visibility: hidden` quando fechado. Durante a transição em si —
+// abrindo ou fechando — o painel fica `visible` (senão o conteúdo some
+// antes/depois da hora); `overflow` só volta a `visible` quando aberto E
+// assentado, para não vazar conteúdo da caixa enquanto ela ainda cresce ou
+// encolhe (esse cuidado é o que protege o anel de foco de um link dentro da
+// resposta, hoje texto puro mas contemplado pelo contrato de `conteudo`).
+export default function Acordeao({
+  itens,
+  abertoInicial = null,
+  // `tituloComo`: tag do cabeçalho de cada item (h3 por padrão) — ajuste
+  // quando o acordeão for usado sob um nível de título diferente.
+  tituloComo: TituloTag = 'h3',
+  // `className`: composto ao contêiner raiz, para o chamador ajustar
+  // layout (largura, margens) sem o componente precisar saber por quê.
+  className,
+}) {
+  // Semente de useState: só vale na montagem. Trocar `abertoInicial` depois
+  // de montado não reabre nada — se uma tarefa futura precisar abrir um
+  // item por link (ex.: Tarefa 13), vai precisar de `key` para remontar ou
+  // de um modo controlado (não existe hoje, com um único chamador).
   const [aberto, setAberto] = useState(abertoInicial)
-  const [assentado, setAssentado] = useState(abertoInicial)
+  const [assentados, setAssentados] = useState({})
   const semMovimento = useReducedMotion()
   const idBase = useId()
 
+  if (import.meta.env.DEV && itemsInvalidos(itens)) {
+    console.warn(
+      'Acordeao: "itens" precisa ser um array de { id, titulo, conteudo } — verifique os dados passados.'
+    )
+  }
+
   function alternar(id) {
-    setAssentado(null)
+    setAssentados((atual) => {
+      const proximo = { ...atual, [id]: false }
+      if (aberto !== null && aberto !== id) proximo[aberto] = false
+      return proximo
+    })
     setAberto((atual) => (atual === id ? null : id))
   }
 
@@ -41,19 +63,17 @@ export default function Acordeao({ itens, abertoInicial = null, tituloComo: Titu
 
   return (
     <div className={classeFinal}>
-      {itens.map((item, indice) => {
+      {itens.map((item) => {
         const isOpen = aberto === item.id
         const idCabecalho = `${idBase}-cab-${item.id}`
         const idPainel = `${idBase}-painel-${item.id}`
-        const painelAssentado = isOpen && assentado === item.id
+        // Ausente em `assentados` = assentado (estado de repouso na
+        // montagem, sem animação a concluir).
+        const assentado = assentados[item.id] ?? true
+        const visivel = isOpen || !assentado
 
-        // Atraso por índice, não um único Revelar em volta do acordeão
-        // inteiro: com dez perguntas o bloco passa fácil dos ~5,9 viewports
-        // em que o `threshold: 0` do `useRevelar` ainda dispara numa tela
-        // baixa, e o acordeão inteiro ficaria em opacity:0 permanente. Ver
-        // Tarefa 3, passo 1.
         return (
-          <Revelar key={item.id} as="div" atraso={indice * 90} className={estilos.item}>
+          <div key={item.id} className={estilos.item}>
             <TituloTag className={estilos.cabecalhoTitulo}>
               <button
                 type="button"
@@ -63,7 +83,7 @@ export default function Acordeao({ itens, abertoInicial = null, tituloComo: Titu
                 aria-controls={idPainel}
                 onClick={() => alternar(item.id)}
               >
-                <span className={estilos.pergunta}>{item.pergunta}</span>
+                <span className={estilos.pergunta}>{item.titulo}</span>
                 <span
                   className={isOpen ? `${estilos.sinal} ${estilos.sinalAberto}` : estilos.sinal}
                   aria-hidden="true"
@@ -74,24 +94,37 @@ export default function Acordeao({ itens, abertoInicial = null, tituloComo: Titu
             </TituloTag>
             <motion.div
               id={idPainel}
-              role="region"
               aria-labelledby={idCabecalho}
               initial={false}
               animate={{ height: isOpen ? 'auto' : 0 }}
               transition={{ duration: semMovimento ? 0 : 0.35, ease: [0.22, 1, 0.36, 1] }}
-              onAnimationComplete={() => {
-                if (isOpen) setAssentado(item.id)
-              }}
+              onAnimationComplete={() =>
+                setAssentados((atual) => ({ ...atual, [item.id]: true }))
+              }
               className={estilos.painel}
-              style={{ overflow: painelAssentado ? 'visible' : 'hidden' }}
+              style={{
+                overflow: isOpen && assentado ? 'visible' : 'hidden',
+                visibility: visivel ? 'visible' : 'hidden',
+              }}
             >
-              <div className={estilos.painelConteudo}>
-                <p className={estilos.resposta}>{item.resposta}</p>
-              </div>
+              <div className={estilos.painelConteudo}>{item.conteudo}</div>
             </motion.div>
-          </Revelar>
+          </div>
         )
       })}
     </div>
+  )
+}
+
+function itemsInvalidos(itens) {
+  return (
+    !Array.isArray(itens) ||
+    itens.some(
+      (item) =>
+        !item ||
+        item.id === undefined ||
+        item.titulo === undefined ||
+        item.conteudo === undefined
+    )
   )
 }

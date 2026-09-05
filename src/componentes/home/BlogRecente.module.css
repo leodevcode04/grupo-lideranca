@@ -2,34 +2,23 @@
   --secao-medida: 680px;
 }
 
-.grade {
+.lista {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--e-4);
+  gap: var(--e-5);
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e-3);
-}
-
-.capaWrapper {
-  aspect-ratio: 16 / 10;
-  border-radius: var(--raio-card);
-  overflow: hidden;
-}
-
-.capa {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.conteudo {
+.item {
   display: flex;
   flex-direction: column;
   gap: var(--e-1);
+  padding-inline-start: var(--e-4);
+  border-inline-start: 1px solid var(--azul-borda);
+}
+
+.item:first-child {
+  padding-inline-start: 0;
+  border-inline-start: none;
 }
 
 .categoria {
@@ -59,12 +48,28 @@
   font-size: var(--t-corpo);
 }
 
+/* Alinhado à esquerda, como o resto da banda (Tarefa 8, 7.11) — antes
+   `align-self: center` isolava o botão numa banda inteiramente à esquerda. */
 .cta {
-  align-self: center;
+  align-self: flex-start;
 }
 
+/* Coluna única abaixo de 768px: o filete vertical vira horizontal entre os
+   itens empilhados, mesma troca do Diferenciais em telas estreitas. */
 @media (max-width: 768px) {
-  .grade {
+  .lista {
     grid-template-columns: 1fr;
+  }
+
+  .item {
+    padding-inline-start: 0;
+    border-inline-start: none;
+    padding-block: var(--e-4);
+    border-top: 1px solid var(--azul-borda);
+  }
+
+  .item:first-child {
+    padding-top: 0;
+    border-top: none;
   }
 }

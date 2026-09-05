@@ -7,7 +7,9 @@
   --azul-borda: rgba(234, 240, 247, 0.10);        /* divisores decorativos */
   --azul-borda-forte: rgba(234, 240, 247, 0.38);  /* contorno de campo de formulário — precisa de 3:1 (mede ~3.24:1) */
   --dourado: #C6A04A;
+  --dourado-rgb: 198, 160, 74;    /* para superfícies translúcidas */
   --dourado-claro: #E0C079;
+  --dourado-claro-rgb: 224, 192, 121; /* halo do CtaFinal (Tarefa 8, 7.8) — mais croma que --dourado-rgb */
   --gelo: #EAF0F7;
   --gelo-suave: rgba(234, 240, 247, 0.60);
   --gelo-tenue: rgba(234, 240, 247, 0.50);        /* mínimo para texto normal; abaixo disso reprova AA */
@@ -21,6 +23,9 @@
   --t-card: clamp(1.15rem, 2vw, 1.4rem);
   --t-corpo: clamp(1rem, 1.4vw, 1.0625rem);
   --t-mini: 0.8125rem;
+  /* Telefone do CtaFinal (Tarefa 8, 7.8) — token próprio, não --t-hero: o
+     corpo do <h1> e o do telefone não têm relação, só coincidiam em valor. */
+  --t-fone: clamp(2.5rem, 4vw, 3rem);
 
   /* Espaçamento */
   --e-1: 0.5rem;

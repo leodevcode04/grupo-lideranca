@@ -39,6 +39,23 @@
   padding-top: calc(var(--e-secao) + var(--altura-cabecalho));
 }
 
+/* Encaixe de decoração (prop `decoracao`, Tarefa 8, 7.6): o mesmo padrão de
+   isolamento do `.grao` global, aplicado só quando há decoração a conter —
+   `position:relative + overflow:hidden + isolation:isolate` criaria um novo
+   stacking context em toda seção à toa. */
+.temDecoracao {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.decoracao {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .noite {
   background: var(--azul-noite);
 }
@@ -55,6 +72,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--e-6);
+  /* Sempre acima da decoração (`.decoracao`, z-index: 0): um bloco em-fluxo
+     não-posicionado pinta ANTES de um descendente posicionado do mesmo
+     ancestral mesmo vindo depois no DOM (CSS2.1, ordem de pintura), então
+     sem isto uma decoração pintaria por cima do conteúdo. Elevar aqui, uma
+     vez, evita que cada chamador precise repetir o `:global(.container) {
+     z-index: 1 }` que o `CtaFinal` fazia (Tarefa 8, 7.6). */
+  position: relative;
+  z-index: 1;
 }
 
 .cabecalho {

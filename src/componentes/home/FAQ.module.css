@@ -4,9 +4,11 @@
 
 /* Coluna de 860px pedida no passo 3 — separada da medida do cabeçalho
    (`--secao-medida` acima), que é mais estreita de propósito: título e
-   acordeão não precisam ter a mesma largura de leitura. */
+   acordeão não precisam ter a mesma largura de leitura. Sem `margin-inline:
+   auto` (Tarefa 8, 7.4): centralizar esta caixa dentro do container de
+   1280px deslocava a borda esquerda do acordeão 162px à direita da borda do
+   `<h2>`, que fica colada ao gutter. As duas bordas agora coincidem. */
 .container {
   max-width: 860px;
   width: 100%;
-  margin-inline: auto;
 }

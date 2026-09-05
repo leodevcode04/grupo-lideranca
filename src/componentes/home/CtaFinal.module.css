@@ -1,37 +1,19 @@
-.medida {
-  --secao-medida: 640px;
-}
+/* Sem `--secao-medida` própria: `centralizado` já fixa max-width:720px no
+   cabeçalho e sobrescreveria em silêncio qualquer valor aqui — era
+   exatamente essa combinação (dead declaration) que o `Secao` agora avisa em
+   DEV (Tarefa 8, 7.6). */
 
-/* Halo dourado atrás do conteúdo: mesmo padrão de isolamento do `.grao`
-   global (position:relative + overflow:hidden + isolation:isolate), mas com
-   um gradiente radial dourado no lugar do ruído — é a última seção antes do
-   rodapé, a única com esse tratamento. */
+/* Halo dourado ao fundo, renderizado pelo encaixe `decoracao` do `Secao`
+   (Tarefa 8, 7.6 — antes alcançava `:global(.container)` do próprio Secao).
+   Raio menor, croma maior, alfa menor que a versão anterior: um `circle` de
+   inset -20% com parada em 60% cobria quase a seção inteira e, composto
+   sobre o azul a 32%, lia como névoa suja em vez de luz (Tarefa 8, 7.8).
+   `--dourado-claro-rgb` (mais claro que `--dourado-rgb`) e transparência
+   perto de 40% leem como fonte de luz, não como mancha. */
 .halo {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.halo::before {
-  content: '';
   position: absolute;
-  inset: -20%;
-  z-index: 0;
-  background: radial-gradient(circle at 50% 35%, rgba(198, 160, 74, 0.32), transparent 60%);
-  pointer-events: none;
-}
-
-/* `.container` aqui é a classe global de `global.css`, o wrapper que o
-   próprio `Secao` renderiza em torno dos filhos — este módulo não tem
-   acesso ao `estilos.container` interno do `Secao` (escopos diferentes), e
-   `:global()` é o único jeito de erguer o conteúdo acima do halo sem alterar
-   o componente. Sem isto o `::before` pintaria por cima: um bloco em-fluxo
-   não-posicionado pinta ANTES de um descendente posicionado com
-   z-index:auto/0 do mesmo ancestral, mesmo vindo depois no DOM (CSS2.1,
-   ordem de pintura). */
-.halo :global(.container) {
-  position: relative;
-  z-index: 1;
+  inset: -8%;
+  background: radial-gradient(circle at 50% 32%, rgba(var(--dourado-claro-rgb), 0.18), transparent 42%);
 }
 
 .conteudo {
@@ -42,9 +24,39 @@
   text-align: center;
 }
 
+/* Marca de fechamento: um filete curto com as pontas esmaecidas, dispositivo
+   que não aparece em nenhuma outra seção — a banda muda de espécie, não só
+   de tamanho (Tarefa 8, 7.8). */
+.assinatura {
+  width: 64px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--dourado-claro), transparent);
+}
+
+.foneBloco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-1);
+}
+
+.foneRotulo {
+  color: var(--gelo-suave);
+  font-size: var(--t-mini);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-caps: all-small-caps;
+}
+
+/* `--t-fone`, não `--t-hero`: o telefone resolvia em exatamente o corpo do
+   `<h1>` por coincidência de valor, não por relação entre os dois — reduzir
+   aqui não deve mexer no hero (Tarefa 8, 7.8). 88px sem rótulo lia como
+   outdoor de call center; 40–48px com "Central de atendimento" acima lê
+   como contato, não como anúncio. */
 .telefone {
   font-family: var(--fonte-titulo);
-  font-size: var(--t-hero);
+  font-size: var(--t-fone);
   color: var(--dourado-claro);
   text-decoration: none;
   transition: color var(--transicao);

@@ -27,6 +27,12 @@
   /* Telefone do CtaFinal (Tarefa 8, 7.8) — token próprio, não --t-hero: o
      corpo do <h1> e o do telefone não têm relação, só coincidiam em valor. */
   --t-fone: clamp(2.5rem, 4vw, 3rem);
+  /* Estimativa do EtapaResumo (Tarefa 11, 6.5) — precisa ficar acima de
+     --t-secao: é o número que as quatro etapas do wizard existem para
+     produzir, não mais um título de seção genérico. Mesmo precedente do
+     --t-fone: o corpo grande marca "isto é o desfecho", não coincidência de
+     escala com outro elemento. */
+  --t-estimativa: clamp(2.75rem, 5.5vw, 4rem);
 
   /* Espaçamento */
   --e-1: 0.5rem;

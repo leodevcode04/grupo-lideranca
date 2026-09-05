@@ -5,6 +5,8 @@
 // validadores — melhor um arquivo de estado só, que os dois lados importam,
 // do que reexportar tudo a partir do componente do wizard.
 
+import { veiculos } from '../../dados/veiculos.js'
+
 export const ETAPAS = ['Veículo', 'Dados do veículo', 'Seus dados', 'Resumo']
 
 // Modelos de fábrica saem à venda antes do ano-calendário virar (um carro
@@ -34,6 +36,20 @@ export const estadoInicial = {
   // impuro e porque `reiniciar` (Tarefa 11) precisa poder fixar `-1` sem
   // depender de um ref que só `avancar`/`voltar` sabiam atualizar.
   direcao: 1,
+}
+
+// `?tipo=` (revisão da Tarefa 11, 6.9): `veiculos.js` documenta que os ids
+// "viajam na URL como ?tipo= em /beneficios e /cotacao", e o passo 2 da
+// Tarefa 12 termina num CTA para `/cotacao?tipo={ativo}`. Sem isto, esse
+// link caía na etapa 0 sem nada pré-selecionado. Valida contra a lista real
+// de veículos (não só "existe a chave") antes de semear `tipo` e pular a
+// etapa 0 — um id inválido ou ausente degrada silenciosamente para o
+// estado inicial normal, sem lançar nem avisar: é o comportamento esperado
+// de link direto sem parâmetro, não um erro.
+export function estadoInicialComTipo(tipoParam) {
+  const valido = veiculos.some((v) => v.id === tipoParam)
+  if (!valido) return estadoInicial
+  return { ...estadoInicial, tipo: tipoParam, etapa: 1 }
 }
 
 export function redutor(estado, acao) {

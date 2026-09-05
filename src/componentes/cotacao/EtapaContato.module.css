@@ -1,20 +1,30 @@
 /* `.titulo` e a grade compartilhada moram em `etapa.module.css`. Aqui só o
-   que é específico deste passo: nome e cidade ocupam a linha inteira (o
-   texto varia muito de comprimento para dividir com um vizinho fixo),
-   telefone e e-mail dividem a segunda linha meio a meio. */
+   que é específico deste passo. O comentário anterior descrevia "telefone e
+   e-mail dividem a segunda linha", mas isso nunca acontecia: `cidade` tinha
+   span 2 e ficava *entre* os dois na ordem do DOM, então o posicionamento
+   automático nunca conseguia emparelhá-los — telefone e email saíam cada
+   um sozinho numa linha, com metade da largura vazia ao lado (revisão,
+   6.3, reintrodução da correção 8.10 da Tarefa 10). A ordem visual real
+   agora é: `nome` ocupa a linha inteira (o texto varia muito para dividir
+   com um vizinho fixo); `telefone` e `cidade` dividem a linha seguinte
+   meio a meio; `email` — opcional e sozinho — ocupa a última linha
+   inteira. */
 
 .grade {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.campoNome,
-.campoCidade {
+.campoNome {
   grid-column: span 2;
 }
 
 .campoTelefone,
-.campoEmail {
+.campoCidade {
   grid-column: span 1;
+}
+
+.campoEmail {
+  grid-column: span 2;
 }
 
 .privacidade {

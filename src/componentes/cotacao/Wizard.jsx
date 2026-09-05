@@ -1,4 +1,5 @@
-import { useEffect, useReducer, useRef, useState } from 'react'
+import { forwardRef, useEffect, useReducer, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion, useIsPresent } from 'framer-motion'
 import Botao from '../ui/Botao.jsx'
 import BarraProgresso from './BarraProgresso.jsx'
@@ -6,7 +7,7 @@ import EtapaVeiculo from './EtapaVeiculo.jsx'
 import EtapaDados from './EtapaDados.jsx'
 import EtapaContato from './EtapaContato.jsx'
 import EtapaResumo from './EtapaResumo.jsx'
-import { ETAPAS, estadoInicial, redutor, validarEtapa } from './estadoWizard.js'
+import { ETAPAS, estadoInicialComTipo, redutor, validarEtapa } from './estadoWizard.js'
 import estilos from './Wizard.module.css'
 
 const variantes = {
@@ -25,7 +26,13 @@ const variantes = {
 // não suposto). `inert` fecha os três buracos de uma vez — não dá pra
 // expressar isso só com CSS de `pointer-events`, por isso o atributo do DOM
 // em vez de uma classe.
-function PainelEtapa({ children, ...motionProps }) {
+// `forwardRef` (revisão, 6.10): componente de função simples faz o
+// `PopChild` interno do Framer Motion (que faz `cloneElement(children, {
+// ref })` para medir o elemento durante a animação de saída) emitir aviso
+// de console a cada transição de etapa. Os refs que importam para foco e
+// `inert` são outros, internos a este componente, e continuam funcionando
+// sem isto — o `forwardRef` só cala o ruído.
+const PainelEtapa = forwardRef(function PainelEtapa({ children, ...motionProps }, refExterno) {
   const isPresent = useIsPresent()
   const ref = useRef(null)
 
@@ -34,14 +41,31 @@ function PainelEtapa({ children, ...motionProps }) {
   }, [isPresent])
 
   return (
-    <motion.div ref={ref} {...motionProps}>
+    <motion.div
+      ref={(el) => {
+        ref.current = el
+        if (typeof refExterno === 'function') refExterno(el)
+        else if (refExterno) refExterno.current = el
+      }}
+      {...motionProps}
+    >
       {children}
     </motion.div>
   )
-}
+})
 
 export default function Wizard() {
-  const [estado, despachar] = useReducer(redutor, estadoInicial)
+  const [searchParams] = useSearchParams()
+  // `?tipo=` (revisão, 6.9): `veiculos.js` já documentava que os ids
+  // "viajam na URL como ?tipo= em /beneficios e /cotacao", e o passo 2 da
+  // Tarefa 12 termina num CTA para `/cotacao?tipo={ativo}` — mas nada aqui
+  // lia o parâmetro, então esse link caía na etapa 0 sem nada
+  // pré-selecionado. `estadoInicialComTipo` valida o id contra `veiculos`
+  // antes de semear `tipo` e pular direto para a etapa 1 (Dados do
+  // veículo); um id desconhecido (ou ausente) degrada para o estado
+  // inicial normal, etapa 0. Passado como função de inicialização lenta do
+  // `useReducer` — roda uma vez no mount, não a cada render.
+  const [estado, despachar] = useReducer(redutor, searchParams.get('tipo'), estadoInicialComTipo)
   const semMovimento = useReducedMotion()
   const painelRef = useRef(null)
   const primeiroRender = useRef(true)
@@ -139,13 +163,22 @@ export default function Wizard() {
 
       <form onSubmit={aoSubmeter} noValidate>
         <div ref={painelRef} className={estilos.painelFoco}>
-          {/* "popLayout" (não "wait"): a etapa que sai é tirada do fluxo (position:
-              absolute) e anima por conta própria, sem bloquear a montagem da
-              etapa que entra. Com "wait" a etapa nova só monta quando a
-              animação de saída da anterior termina — que depende de um
-              callback via requestAnimationFrame; se o rAF não dispara (aba
-              oculta, por exemplo), a troca trava indefinidamente. */}
-          <AnimatePresence mode="popLayout" initial={false}>
+          {/* Modo padrão ("sync"), não "wait" nem "popLayout" (revisão, 6.4):
+              "wait" só monta a etapa nova quando a animação de saída da
+              anterior termina — depende de um callback via
+              requestAnimationFrame, e se o rAF não dispara (aba oculta, por
+              exemplo) a troca trava indefinidamente. "popLayout" evitava
+              isso tirando a etapa que sai do fluxo do documento (Tarefa 10,
+              8.1), mas uma etapa fora do fluxo não conta para o tamanho do
+              `.painelFoco`, que agora depende de as duas etapas —
+              entrando e saindo — ocuparem a mesma célula de grade ao mesmo
+              tempo para que o contêiner assuma `max(entrando, saindo)`
+              (6.4). "sync" mantém as duas montadas e no fluxo durante a
+              transição, sem esperar rAF nenhum para a entrada começar. O
+              `inert` do `PainelEtapa` (Tarefa 10, 8.1) já resolve
+              pointer-events/tabulação da etapa que sai independentemente
+              do modo — nunca dependeu do "popLayout" para isso. */}
+          <AnimatePresence initial={false}>
             <PainelEtapa
               key={estado.etapa}
               custom={estado.direcao}
@@ -177,7 +210,13 @@ export default function Wizard() {
                   aoMudarCampo={aoMudarCampo}
                 />
               )}
-              {estado.etapa === 3 && <EtapaResumo estado={estado} despachar={despachar} />}
+              {estado.etapa === 3 && (
+                <EtapaResumo
+                  estado={estado}
+                  aoReiniciar={() => despachar({ tipo: 'reiniciar' })}
+                  aoIrParaEtapa={(etapa) => despachar({ tipo: 'irPara', etapa })}
+                />
+              )}
             </PainelEtapa>
           </AnimatePresence>
         </div>

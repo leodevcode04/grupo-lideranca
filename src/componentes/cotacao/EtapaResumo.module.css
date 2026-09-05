@@ -1,3 +1,23 @@
+/* Rótulo do <h2> desta etapa (revisão, 6.5): o `.titulo` compartilhado é
+   52px em Fraunces — o mesmo corpo do `.valor` abaixo, sem hierarquia
+   nenhuma entre o cabeçalho genérico e o número que quatro etapas de
+   trabalho existem para produzir. Rebaixado a etiqueta (mesma escala do
+   `.nomePlano`), para o destaque real ser a primeira coisa em que o olho
+   pousa. Mantém `.titulo` na composição de classes só pelo alvo de foco e
+   pelo `scroll-margin-top` — o tamanho é sobrescrito aqui.
+   Precisa vir depois de `estilosEtapa.titulo` na composição de classes: CSS
+   Modules com especificidade igual resolve por ordem de importação, e
+   `EtapaResumo.module.css` é importado depois de `etapa.module.css` neste
+   arquivo. */
+.tituloEtiqueta {
+  font-size: var(--t-mini);
+  font-family: var(--fonte-corpo);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gelo-suave);
+  margin-bottom: var(--e-3);
+}
+
 .destaque {
   background: var(--azul-elevado);
   border: 1px solid var(--azul-borda);
@@ -15,9 +35,15 @@
   margin-bottom: var(--e-1);
 }
 
+.valorRevelar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .valor {
   font-family: var(--fonte-titulo);
-  font-size: var(--t-secao);
+  font-size: var(--t-estimativa);
   color: var(--dourado-claro);
 }
 
@@ -25,6 +51,16 @@
   font-family: var(--fonte-corpo);
   font-size: var(--t-mini);
   color: var(--gelo-suave);
+}
+
+/* Filete dourado sob a estimativa (revisão, 6.5) — mesmo recurso de
+   hierarquia quieta usado em outras seções de destaque do site: marca o
+   número como o desfecho, sem gritar. */
+.filete {
+  width: 48px;
+  height: 2px;
+  background: var(--dourado);
+  margin-top: var(--e-2);
 }
 
 .coberturas {
@@ -49,11 +85,57 @@
   color: var(--dourado);
 }
 
+.grupo {
+  margin-bottom: var(--e-4);
+}
+
+.grupoCabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-2);
+  margin-bottom: var(--e-1);
+}
+
+.grupoRotulo {
+  font-size: var(--t-mini);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gelo-tenue);
+}
+
+/* Botão "Editar" (revisão, 6.8): usa `irPara` além do uso defensivo do
+   aviso de dados incompletos — o recap é a última confirmação antes de
+   dados irem para uma pessoa, então mostrar o que foi capturado sem dar um
+   jeito de corrigir era o inerte. Ressalva registrada onde `irPara` vive
+   (`estadoWizard.js`): o salto pula `validarEtapa` porque hoje é sempre
+   para trás; se um "Editar" um dia saltar para a frente, a guarda precisa
+   voltar. */
+.editar {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--t-mini);
+  color: var(--gelo-suave);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.editar:hover {
+  color: var(--dourado);
+}
+
+.editar:focus-visible {
+  outline: 2px solid var(--dourado);
+  outline-offset: 2px;
+}
+
 .dados {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--e-2) var(--e-3);
-  margin-bottom: var(--e-4);
+  margin-bottom: 0;
 }
 
 .dados dt {

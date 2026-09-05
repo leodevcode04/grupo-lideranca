@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import Campo from './Campo.jsx'
+import { digitosAntesDoCursor, restaurarCursorPorDigitos } from './cursorPorDigitos.js'
 import estilosEtapa from './etapa.module.css'
 import estilos from './EtapaDados.module.css'
 
@@ -36,33 +37,20 @@ export default function EtapaDados({ valores, erros, aoMudarCampo }) {
   // `onChange` (antes do reformate) e usados para recolocar o cursor depois
   // que o novo valor formatado for pintado. Sem isto, a máscara reformata a
   // cada tecla e editar no meio de "60.000" joga o cursor para o fim
-  // (Tarefa 10, 8.4).
+  // (Tarefa 10, 8.4). Helper compartilhado com o `EtapaContato` (Tarefa 11,
+  // 6.2).
   const digitosAntesCursor = useRef(null)
 
   function aoMudarValor(textoDigitado) {
-    const el = valorRef.current
-    const pos = el?.selectionStart ?? textoDigitado.length
-    digitosAntesCursor.current = textoDigitado.slice(0, pos).replace(/\D/g, '').length
+    digitosAntesCursor.current = digitosAntesDoCursor(valorRef.current, textoDigitado)
     aoMudarCampo('valor', paraNumeroFormatado(textoDigitado))
   }
 
   useEffect(() => {
     const alvo = digitosAntesCursor.current
-    const el = valorRef.current
-    if (alvo == null || !el) return
+    if (alvo == null) return
     digitosAntesCursor.current = null
-    const texto = el.value
-    let vistos = 0
-    let pos = texto.length
-    for (let i = 0; i < texto.length; i++) {
-      if (/\d/.test(texto[i])) vistos++
-      if (vistos === alvo) {
-        pos = i + 1
-        break
-      }
-    }
-    if (alvo === 0) pos = 0
-    el.setSelectionRange(pos, pos)
+    restaurarCursorPorDigitos(valorRef.current, alvo)
   }, [valores.valor])
 
   return (

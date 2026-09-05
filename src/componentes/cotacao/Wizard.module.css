@@ -21,17 +21,28 @@
      visível do conteúdo não muda. */
   padding-inline: var(--e-2);
   margin-inline: calc(var(--e-2) * -1);
-  /* Sem altura mínima, o `popLayout` tira a etapa que sai do fluxo e o
-     contêiner encolhe para a altura da etapa que entra enquanto o conteúdo
-     ainda desliza — Voltar/Continuar saltam ~470px no meio da animação
-     (Tarefa 10, 8.11). Remedido depois que a Tarefa 11 acrescentou
-     `EtapaResumo`: a etapa mais alta a 880px de largura passou a ser o
-     resumo (~770px, entre destaque, coberturas, recapitulação e os dois
-     botões), levemente acima dos ~760px dos cards do passo 1 — daí o piso
-     ter subido 20px. Não é um teto: nenhuma etapa fica cortada se crescer
-     além disto, só existe espaço vazio abaixo dela enquanto for mais baixa.
-  */
-  min-height: 780px;
+  /* Sem piso fixo (revisão da Tarefa 11, 6.4): o `min-height: 780px`
+     anterior vinha de um comentário que afirmava a etapa 1 tinha "~760px" —
+     medido de novo, ela tem 941,5px, de forma determinística (quatro cards
+     em `aspect-ratio: 4/3` numa coluna de 428px). Um piso não serve a um
+     conjunto cujos extremos são 290px (Dados) e 941px (Veículo): 780px
+     ainda deixava a etapa 1 estourar 161px (os botões pulando no meio da
+     animação, que era toda a premissa da 8.11) e ainda deixava ~490px de
+     espaço morto sob a etapa 2.
+     A correção certa dispensa piso e anima altura de outro jeito: empilha
+     os filhos do `AnimatePresence` na mesma célula de grade — ver `> *`
+     abaixo. O contêiner passa a assumir `max(entrando, saindo)` durante a
+     transição (as duas etapas ficam em cima uma da outra, então as duas
+     contam para o tamanho da grade) e assenta na altura da etapa que
+     entrou assim que a que saiu desmonta. Por isso o `AnimatePresence` do
+     `Wizard.jsx` não usa mais `mode="popLayout"`: aquele modo tira a etapa
+     que sai do fluxo do documento, e uma etapa fora do fluxo não conta
+     para o tamanho da grade — o encolhimento instantâneo voltaria. */
+  display: grid;
+}
+
+.painelFoco > * {
+  grid-area: 1 / 1;
 }
 
 .somenteLeitor {
@@ -56,16 +67,3 @@
   margin-left: auto;
 }
 
-@media (max-width: 640px) {
-  /* O layout compacto do passo 1 (Tarefa 10, 8.12) é bem mais baixo que o
-     desktop — mantém um piso próprio em vez de herdar os 780px acima, que
-     no mobile sobrariam como espaço vazio abaixo do conteúdo. `EtapaResumo`
-     empilha em uma coluna no mobile (~1130px, bem acima deste piso) — o
-     piso deste breakpoint segue medido pela etapa mais curta (o passo 1),
-     não pela mais alta, porque é aqui que a variação de altura entre etapas
-     mais incomodaria se o piso fosse alto demais.
-  */
-  .painelFoco {
-    min-height: 540px;
-  }
-}

@@ -40,6 +40,11 @@ export default function Botao({
         {...resto}
       >
         {children}
+        {/* Aviso de nova aba tratado uma vez aqui (revisão, 6.10), não em
+            cada chamada que passa `href` externo: texto visualmente oculto,
+            só para quem usa leitor de tela — visualmente o botão já diz
+            "Enviar no WhatsApp" sem precisar de sinalização extra. */}
+        {externo && <span className={estilos.somenteLeitor}> (abre em nova aba)</span>}
       </a>
     )
   }

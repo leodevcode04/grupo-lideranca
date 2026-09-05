@@ -1907,7 +1907,7 @@ git commit -m "Adiciona cálculo da estimativa de mensalidade com testes"
 
 ---
 
-### Task 10: Wizard de cotação — estado, progresso e etapas 1 e 2
+### Task 10: Wizard de cotação — estado, progresso e etapas 1 e 2 (revisada)
 
 **Files:**
 - Create: `src/componentes/cotacao/Wizard.jsx` + `.module.css`
@@ -2015,7 +2015,166 @@ header fixo.
 Expected: escolher um veículo avança sozinho; deixar campos vazios e clicar em
 Continuar mostra os erros sem trocar de etapa; voltar preserva o preenchido.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 8: Correções apontadas na revisão**
+
+O passo 1 é a peça de destaque de verdade: quatro cards fotografados, um clique, sem
+digitação. O passo 2 é um formulário com uma barra de progresso parafusada em cima — e é
+por ele que as pessoas realmente têm que passar. Fechar essa distância é o trabalho aqui.
+
+**8.1 — O painel que sai continua vivo, e isso pula a validação.** Com
+`AnimatePresence mode="popLayout"` o passo anterior permanece montado com
+`pointer-events: auto`. Clicar num card de veículo fantasma despacha `campo` + `avancar`
+direto no redutor, **sem passar pelo `validarEtapa`**: o wizard salta da etapa 1 para a 2
+sem preencher nada e ainda sobrescreve o `tipo` já escolhido. Reproduzido, não suposto.
+
+Use **`inert`** no elemento que está saindo, não só `pointer-events: none`. O passo velho
+está também na ordem de tabulação e na árvore de acessibilidade — quem usa leitor de tela
+consegue tabular de volta para dentro dele. `inert` fecha os três buracos de uma vez.
+
+**8.2 — O foco é roubado no meio da digitação.** Na etapa 2, clicar em Continuar com tudo
+vazio põe o foco em `#marca`, correto. Digitar **uma letra** joga o foco em `#modelo`: o
+usuário digita "F" e o resto de "Fiat" vai para o campo errado.
+
+A causa está na forma do estado, não no efeito: `case 'campo'` reescreve `erros` a cada
+tecla, então o objeto muda de identidade constantemente e o efeito não consegue distinguir
+"a validação acabou de falhar" de "um campo foi corrigido". Acrescente um discriminador —
+um contador `tentativa` incrementado **apenas** pelo `case 'erros'` — e chaveie o efeito
+por ele.
+
+**8.3 — A região `role="alert"` reanuncia a cada tecla.** Mesma causa. Enquanto o usuário
+corrige, ela dispara "4 campos com erro", depois "3", depois "2" — interrompendo o leitor
+de tela justamente enquanto se digita no campo que está sendo corrigido. Prenda ao mesmo
+sinal de tentativa e troque para `role="status"`: o movimento de foco já é o sinal
+assertivo, e duas regiões assertivas disparando juntas fazem os leitores descartarem uma
+das duas de forma imprevisível. A contagem merece existir — é o que o campo focado não
+consegue dizer —, mas uma vez só.
+
+**8.4 — A máscara infla o valor em 100 vezes.** Colar "60.000,50" remove todo não-dígito e
+produz `6000050`: um veículo de R$ 60.000,50 vira R$ 6.000.050 e muda completamente a
+estimativa. Não é só "centavos não são representáveis", é corrupção silenciosa de ordem de
+grandeza. Trate separador decimal na colagem, ou rejeite a entrada ambígua.
+
+Aproveite e conserte o cursor: a máscara reformata a cada tecla, então editar no meio de
+"60.000" joga o cursor para o fim.
+
+**8.5 — A direção da transição tem que sair do ref e ir para o redutor.** O ref é lido
+durante o render, o que torna o render impuro — e isso quebra na Tarefa 11: o "Refazer" do
+`EtapaResumo` despacha `reiniciar` sem saber que `direcaoRef` existe, então o ref fica com
+`1` da última chamada de `avancar` e o reset de quatro etapas **anima para a frente**, como
+se o usuário estivesse avançando. Estado e animação passam a se contradizer.
+
+A direção é estado de verdade: é propriedade da transição que o redutor acabou de
+executar, e só o redutor sabe qual foi. Ponha `direcao` no estado, com `1` no `avancar`,
+`-1` no `voltar` e `-1` no `reiniciar`. Some o ref e as duas atribuições nos handlers.
+
+**8.6 — O foco de troca de etapa vai para o título, não para o contêiner.** Focar um
+`role="group"` rotulado é defensável, mas o `<h2 tabIndex={-1}>` é melhor: anuncia "Dados
+do veículo, título nível 2", dizendo *onde no documento* se está e não só um nome; elimina
+a duplicidade de fonte de verdade entre `ETAPAS[etapa]` e o `<h2>` — que **já estão
+divergentes** na etapa 0 ("Veículo" contra "Qual veículo você quer proteger?") e
+redundantemente idênticos na etapa 1; e é alvo visível, então restaurar o anel de foco
+(8.8) ajuda também quem enxerga, em vez de desenhar uma caixa em volta de 880px de nada.
+
+**8.7 — A página perdeu o `<h1>`.** Antes havia um; agora o primeiro título é o `<h2>` da
+etapa. Todas as outras rotas têm um. É regressão desta tarefa e a Tarefa 14 vai apontar.
+
+Aproveite para preencher a lacuna de conteúdo: `/cotacao` abre sem título, sem subtítulo e
+sem nenhuma tranquilização. Para uma associação que pede o valor do veículo e, duas etapas
+depois, um telefone, o registro de banco privado pede exatamente uma linha acima da barra —
+o que é isto, quanto tempo leva e que é simulação sem compromisso. O plano põe o aviso só
+na etapa 4, tarde demais: o momento de ansiedade é a etapa 3, quando se pede o telefone.
+
+**8.8 — Campos inválidos não ficam destacados, mas o aviso diz que ficam.** A mensagem diz
+"Revise os campos destacados" e nada está destacado: a borda de um campo com erro é
+idêntica à de um campo válido. O único indicador é o texto vermelho embaixo, que é
+justamente o que alguém com baixa visão varrendo o formulário menos associa à caixa acima.
+Destaque a borda com `--erro`.
+
+E devolva o anel de foco: `.input:focus-visible { outline: none }` substitui o anel dourado
+de 2px do site por uma troca de borda de 1px. Campo de formulário deve ter o indicador de
+foco **mais forte** da página, não o mais fraco. O plano pediu "borda dourada no foco", não
+a remoção do anel. Mesmo problema no `.painelFoco:focus-visible`.
+
+**8.9 — Faltou o `<form>`, então Enter não faz nada.** Num passo de quatro campos, Enter
+depois do último é o comportamento de teclado mais esperado que existe, e está morto.
+Envolva o painel num `<form onSubmit>` com o Continuar como `type="submit"`. Isso também
+entrega a tecla "Ir" do mobile e um comportamento muito melhor de autofill e gerenciador de
+senhas — o que importa bastante na Tarefa 11, cujos campos são nome, telefone, cidade e
+e-mail.
+
+**8.10 — A grade do passo 2 está errada para os dois passos.** Os dois passos declaram a
+mesma `repeat(auto-fit, minmax(220px, 1fr))`. Nos 880px do wizard isso dá: no passo 1,
+três colunas, então os quatro cards saem **3 + 1 órfão**; no passo 2, `Marca | Modelo |
+Ano` na primeira linha e **`Valor do veículo` sozinho** na segunda, com 277px de largura e
+uns 600px de vazio ao lado.
+
+Largura de campo deve sinalizar o tamanho esperado da entrada — um `Ano` de 4 dígitos com a
+mesma largura de `Marca` é cheiro de formulário mal feito — e o `Valor`, que é justamente o
+campo que alimenta o `calcularMensalidade`, é o que ficou órfão e visualmente rebaixado.
+Dê grade explícita a cada passo: duas colunas para os quatro cards, e no passo 2 algo como
+`Marca | Modelo` numa linha e `Ano` (estreito) `| Valor` (largo) na outra.
+
+**8.11 — Os botões saltam 470px a cada troca de etapa.** O painel não tem `min-height`, e
+como o `popLayout` tira o passo que sai do fluxo, o contêiner encolhe para a altura do novo
+passo enquanto o conteúdo ainda desliza: `Voltar`/`Continuar` sobem de repente no meio da
+animação (etapa 1 tem 758px, etapa 2 tem 290px). Vai piorar na Tarefa 11, onde o
+`EtapaResumo` volta a ser alto.
+
+**8.12 — No mobile, escolher um veículo são 3,7 telas de rolagem.** Em 375×812 cada card
+tem 341px e o documento fica com 2967px: não dá para ver as quatro opções ao mesmo tempo, e
+nada avisa que a própria escolha avança. Um layout compacto no mobile (miniatura à
+esquerda, nome e chamada à direita, uns 96px de altura) põe os quatro numa tela — e é o
+aparelho em que a maior parte desse tráfego vive.
+
+**8.13 — Extrair o `Campo` agora.** Ele **já existe**, como componente privado no fim do
+`EtapaDados.jsx`, e já faz o trabalho inteiro: associação rótulo/input, `aria-invalid`,
+`aria-describedby` ligado ao id do erro, parágrafo de erro condicional, prefixo opcional,
+spread de props. O `EtapaContato` da Tarefa 11 precisa de quatro campos com marcação
+idêntica e o mesmo contrato de erro.
+
+Isto **não** é a abstração prematura que as revisões anteriores rejeitaram: a abstração já
+está escrita e o segundo consumidor já está especificado no plano. A escolha não é
+"abstrair ou esperar", é "mover um arquivo ou copiar 25 linhas de fiação de ARIA". Fiação
+de ARIA copiada é a que deriva: uma das cópias vai perder o `aria-describedby` e a Tarefa
+14 vai achar num passo e não no outro.
+
+Mova para `src/componentes/cotacao/Campo.jsx` + `.module.css` (fica em `cotacao/`, não em
+`ui/` — não é livre de domínio enquanto nada fora do wizard usar). E, já que está aberto,
+acrescente três coisas, todas mais baratas agora do que depois que o `EtapaContato` copiar
+a forma atual:
+
+1. Prop `name` repassando `autoComplete`. O `EtapaContato` quer `name`, `tel`,
+   `address-level2` e `email` — no celular isso é a diferença entre um passo de 20 segundos
+   e um de 90, e é a linha de maior alavancagem do wizard inteiro.
+2. Prop `opcional`. O plano exige que o e-mail seja "rotulado como tal", e esse rótulo
+   pertence ao `Campo`, não repetido em cada chamada.
+3. Prop de `type`, para o e-mail ser `type="email"` e abrir o teclado certo no celular.
+
+**8.14 — Ajustes menores.**
+
+- `.painelFoco { overflow: hidden }` corta o anel de foco dos cards das pontas, colados nas
+  bordas de 880px. Dê padding horizontal com margem negativa compensando.
+- O scroll do foco ignora o header fixo: após a falha de validação a janela para em
+  `scrollY: 165` e a barra de progresso fica atrás do header — perdendo a pista de
+  orientação exatamente quando ela é mais necessária. Use `scroll-margin-top` no painel e
+  nos campos.
+- `.titulo` e `.grade` estão byte a byte iguais nos dois módulos de etapa. A Tarefa 11
+  acrescenta mais dois arquivos de etapa; extrair o `Campo` leva a maior parte disso, e um
+  `etapa.module.css` compartilhado leva o resto.
+- `estadoInicial`, `redutor` e `validarEtapa` estão exportados sem consumidor. Ou viram a
+  costura (junto com `ETAPAS`, num `src/componentes/cotacao/estadoWizard.js`, que também
+  deixa o diff da Tarefa 11 legível), ou o `export` sai.
+- O `EtapaDados` recebe o estado inteiro e lê cinco chaves. O `EtapaResumo` legitimamente
+  precisa do objeto todo, mas os passos de formulário deveriam receber `valores` + `erros`
+  — a diferença entre um passo que declara o que precisa e um que alcança qualquer coisa.
+- `validarEtapa` lê `estado.etapa` internamente, então só valida a etapa em que se está.
+  Uma tabela de validadores indexada por etapa custa as mesmas linhas e permite ao
+  `EtapaResumo` perguntar "a etapa 2 está completa?" para guardar o caso de link direto.
+- A barra mostra trilho vazio na etapa 1. É o que o plano pediu, mas um wizard cuja
+  primeira tela mostra progresso zero num trilho de 2px a 10% de branco não comunica nada.
+  Considere um piso mínimo.
+
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A

@@ -1711,7 +1711,7 @@ git commit -m "Adiciona blog recente, FAQ e CTA final; completa a home"
 
 ---
 
-### Task 9: Cálculo da cotação (TDD)
+### Task 9: Cálculo da cotação (TDD) ✅
 
 **Files:**
 - Create: `src/dados/calculo.js`
@@ -1768,6 +1768,19 @@ describe('calcularMensalidade', () => {
 })
 ```
 
+**O ano corrente é injetável, não constante.** Um `ANO_ATUAL = 2026` fixo derivaria em
+silêncio: em 2027 todo veículo seria calculado um ano mais novo do que é, e nenhum teste
+quebraria. Por isso `anoAtual` é parâmetro com padrão `new Date().getFullYear()`, e os
+seis testes acima fixam `anoAtual: 2026` explicitamente — suíte que começa a falhar no
+dia 1º de janeiro é pior que o bug que ela deveria pegar.
+
+Dois testes a mais fecham as brechas: um confirmando que o padrão pega o ano real, e um
+para o guarda de `ano` inválido.  é  e  é ; nenhum
+dos dois estoura sozinho, e ambos produziriam um ajuste de idade silenciosamente errado —
+exatamente o tipo de falha que este módulo existe para impedir. A faixa de 1980 a 2026 
+**não** é revalidada aqui: é validação de apresentação, com mensagem para o usuário, e 
+pertence ao formulário da Tarefa 11.
+
 - [ ] **Step 2: Rodar e ver falhar**
 
 Run: `npm test`
@@ -1785,11 +1798,10 @@ export const PERCENTUAL_POR_TIPO = {
   'caminhoes-pesados': 0.009,
 }
 
-const ANO_ATUAL = 2026
 const AJUSTE_VEICULO_ANTIGO = 0.12
 const AJUSTE_VEICULO_NOVO = -0.08
 
-export function calcularMensalidade({ tipo, valor, ano }) {
+export function calcularMensalidade({ tipo, valor, ano, anoAtual = new Date().getFullYear() }) {
   const percentual = PERCENTUAL_POR_TIPO[tipo]
   if (percentual === undefined) {
     throw new Error(`Tipo de veículo desconhecido: ${tipo}`)
@@ -1798,7 +1810,12 @@ export function calcularMensalidade({ tipo, valor, ano }) {
     throw new Error('Valor do veículo deve ser maior que zero')
   }
 
-  const idade = ANO_ATUAL - Number(ano)
+  const anoNum = Number(ano)
+  if (!Number.isFinite(anoNum)) {
+    throw new Error('Ano do veículo inválido')
+  }
+
+  const idade = anoAtual - anoNum
   const ajuste =
     idade > 10 ? AJUSTE_VEICULO_ANTIGO : idade <= 3 ? AJUSTE_VEICULO_NOVO : 0
 

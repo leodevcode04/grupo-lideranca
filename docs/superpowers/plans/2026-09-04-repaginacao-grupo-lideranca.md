@@ -1831,7 +1831,74 @@ export function calcularMensalidade({ tipo, valor, ano, anoAtual = new Date().ge
 Run: `npm test`
 Expected: PASS — 6 testes.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Correções apontadas na revisão**
+
+Este é o único lugar do projeto onde um número errado passa em silêncio. Dois guardas
+falham exatamente nos casos que deveriam cobrir.
+
+**5.1 — `Number.isFinite` não pega string vazia.** A justificativa do guarda cita
+`Number('')` valendo `0`, mas `0` é finito e passa. E `''` não é hipotético: é o valor
+inicial de `ano` no `estadoInicial` da Tarefa 10. Qualquer caminho que chegue ao
+`EtapaResumo` sem a etapa 2 preenchida — link direto, `reiniciar` seguido de salto, um
+futuro botão de editar — produz `idade = 2026`, cai na faixa de mais de dez anos e cobra
+a **sobretaxa de veículo antigo** sobre um veículo cujo ano nunca foi digitado. Erro
+plausível é pior que erro barulhento.
+
+Valide a forma antes de coagir. Cubra nos testes `''`, `null`, `'  '` e `[]` — hoje os
+quatro coagem para `0` ou `NaN` de maneiras diferentes.
+
+**5.2 — Chaves herdadas de `Object.prototype` passam pelo guarda de tipo.**
+`PERCENTUAL_POR_TIPO['toString']` devolve a função herdada, então `percentual === undefined`
+é falso e o resultado sai `NaN` — que o `Intl.NumberFormat` renderiza como "R$ NaN". Vale
+para `constructor`, `valueOf` e `hasOwnProperty`. É alcançável: os ids viajam na URL como
+`?tipo=`, portanto `tipo` é entrada controlada pelo usuário. Use
+`Object.hasOwn(PERCENTUAL_POR_TIPO, tipo)`.
+
+**5.3 — As bordas das faixas de idade não são testadas, e os dois off-by-one clássicos
+sobrevivem à suíte.** Trocar `idade > 10` por `>= 10`, ou `idade <= 3` por `< 3`, deixa os
+oito testes verdes. Acrescente, com `anoAtual: 2026`:
+
+| `ano` | idade | `ajuste` esperado |
+|---|---|---|
+| 2016 | 10 | `0` (dez não é "mais de dez") |
+| 2015 | 11 | `0.12` |
+| 2023 | 3 | `-0.08` |
+| 2022 | 4 | `0` |
+
+Use `toBe` no `ajuste`, não `toBeCloseTo` — os valores são as constantes literais, e
+`toBeCloseTo(0.12)` aceitaria `0.1201`.
+
+**5.4 — `valor` não recebeu o mesmo tratamento defensivo que `ano`.** `!(valor > 0)`
+rejeita `'R$ 60.000'`, mas deixa passar o que o JS coage: `'60.000'` vira base `0.81` e
+mensalidade de R$ 80; `true` vira R$ 79; `[60000]` funciona por acidente. `'60.000'` é
+exatamente a string que uma máscara de moeda incompleta emite. Coaja explicitamente e
+rejeite o que não for finito e positivo.
+
+**5.5 — Devolver também a base ajustada.** Hoje `base + taxaAdmin ≠ mensalidade` sempre
+que houver ajuste (810 + 79 = 889, mas o total de veículo antigo é 986). A Tarefa 11
+mostra só o total, então nada quebra — mas se alguém acrescentar um detalhamento "base +
+taxa administrativa", ele visivelmente não fecha. Devolva `baseAjustada` já arredondada,
+para o detalhamento fechar por construção.
+
+**5.6 — Comentar o arredondamento.** `Math.round` sobre float perde o `.5` exato em alguns
+casos (`11500 * 0.011` dá `126.49999999999999`, que arredonda para 126 e não 127). Sempre
+R$ 1 de diferença, sempre para baixo, e o valor é declaradamente estimativa — não mude o
+código. Comente que é deliberado, para ninguém "consertar" isso depois numa resposta
+diferente.
+
+**5.7 — O percentual de carros está fora da realidade do setor.** 1,35% ao mês são 16,2%
+do valor do veículo por ano: um carro de R$ 60 mil sai a R$ 889/mês, entre o dobro e o
+triplo do que uma associação de proteção veicular cobra no Brasil — e sair mais barato que
+seguradora é justamente o argumento do setor. Motos e caminhões estão plausíveis. Baixe
+`carros` para cerca de `0.006`, o que põe o mesmo carro perto de R$ 440/mês. Ajuste os
+testes que dependem do valor.
+
+**5.8 — A Tarefa 10 reintroduz o bug do ano fixo.** A validação dela rejeita ano maior que
+`2026` literal, então em 2027 um veículo legítimo é recusado. Como o `calculo.js` agora é
+quem sabe o que é "ano corrente", a Tarefa 10 deve usar `new Date().getFullYear()` nesse
+limite.
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add -A

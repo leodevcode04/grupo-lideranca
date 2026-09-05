@@ -2183,7 +2183,7 @@ git commit -m "Adiciona wizard de cotação com as duas primeiras etapas"
 
 ---
 
-### Task 11: Wizard — etapas 3 e 4
+### Task 11: Wizard — etapas 3 e 4 (revisada)
 
 **Files:**
 - Create: `src/componentes/cotacao/EtapaContato.jsx`, `EtapaResumo.jsx` + `.module.css`
@@ -2232,7 +2232,162 @@ Expected: percorrer as quatro etapas produz uma estimativa coerente com o cálcu
 link do WhatsApp abre com a mensagem preenchida. Recarregar em `/cotacao` começa do zero
 sem erro no console.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Correções apontadas na revisão**
+
+Veredito: a etapa 4 se sustenta estruturalmente e falha dramaticamente; a etapa 3 recai em
+"formulário com barra de progresso parafusada em cima" — reproduzindo dois dos defeitos que
+as catorze correções da Tarefa 10 já tinham consertado uma etapa antes.
+
+**6.1 — A máscara de telefone prende o usuário: backspace não apaga o DDD.** Digite `48`,
+o campo mostra `(48) `. Aperte backspace: o valor vai para `(48)`, a máscara rededuz os
+dígitos `48` e devolve `(48) `. Não dá para corrigir um DDD errado apagando — só
+selecionando tudo e redigitando. Isso no campo de maior atrito do wizard, na etapa para
+onde o fluxo inteiro converge.
+
+A função do plano é verbatim, mas o plano não pediu uma armadilha. Feche o parêntese só
+quando houver algo depois dele:
+
+```js
+a.length === 2 && (b || c) ? ') ' : ''
+```
+
+Assim sobra `(48` depois do backspace, que apaga normalmente.
+
+**6.2 — O conserto de cursor da correção 8.4 não foi levado para o telefone.** Com
+`(48) 99145-2750` no campo, inserir um dígito depois de `(4` produz `(49) 89914-5275` com o
+cursor no fim — e toda tecla seguinte cai no lugar errado. O `EtapaDados` já tem o
+rastreio por contagem de dígitos exatamente para isso; o `EtapaContato` não tem nada.
+Extraia o helper e use nos dois. Enviar a versão consertada e a não consertada lado a lado
+é o pior dos três caminhos.
+
+**6.3 — A grade do `EtapaContato` nunca produz o layout que o próprio comentário
+descreve.** O CSS diz "telefone e e-mail dividem a segunda linha meio a meio". Medido em
+880px: `nome` ocupa 880, `telefone` 428 com 428px de vazio à direita, `cidade` 880,
+`email` 428 com outros 428px de vazio. Como `cidade` tem span 2 e está entre os dois na
+ordem do DOM, o posicionamento automático nunca consegue emparelhar `telefone` com
+`email`.
+
+É a correção **8.10 reintroduzida uma tarefa depois**. Reordene mantendo ordem do DOM igual
+à ordem visual: `nome` (span 2), depois `telefone` + `cidade` dividindo a linha, depois
+`email`. E corrija o comentário.
+
+**6.4 — A `min-height` foi dimensionada por uma medida que não é verdadeira.** Alturas
+naturais reais em 1440×900, painel de 880px:
+
+| etapa | altura | contra o piso de 780 |
+|---|---|---|
+| 1 Veículo | **941,5** | estoura em 161px |
+| 2 Dados | 290,3 | **490px de espaço morto** |
+| 3 Seus dados | 547,3 | 233px de espaço morto |
+| 4 Resumo | 770,3 | cabe |
+
+O comentário no CSS afirma que a etapa 1 tem "~760px" e que o resumo é o mais alto. A
+etapa 1 tem 941,5px de forma determinística: quatro cards em `aspect-ratio: 4/3` numa
+coluna de 428px dão 415px cada, duas linhas mais gap mais os 55px do título.
+
+Consequências: indo da 1 para a 2 o painel ainda desaba de 941 para 780 no meio da
+animação e os botões ainda saltam 161px — que é toda a premissa da 8.11; e o espaço morto
+está sob a etapa **2**, não sob a 1.
+
+Um piso único não serve a um conjunto cujos extremos são 290px e 941px. A correção certa
+dispensa piso e animação de altura: empilhe os filhos do `AnimatePresence` na mesma célula
+de grade.
+
+```css
+.painelFoco { display: grid; }
+.painelFoco > * { grid-area: 1 / 1; }
+```
+
+O contêiner passa a assumir naturalmente `max(entrando, saindo)` durante a transição — sem
+colapso, sem piso, sem espaço morto — e assenta na altura do passo que entrou quando o que
+saiu desmonta.
+
+**6.5 — A estimativa não tem hierarquia tipográfica: o número simplesmente aparece.** O
+`.valor` e o `.titulo` da etapa são **ambos 52px em Fraunces** no desktop e ambos 32px no
+mobile. O número que quatro etapas de trabalho existem para produzir tem o mesmo corpo do
+cabeçalho genérico logo acima, e só ganha pela cor — dentro de uma caixa discreta, a um
+terço de um painel de 770px. Nada o marca como o desfecho.
+
+Já existe precedente no projeto: o `--t-fone` foi criado na Tarefa 8 exatamente por isso.
+Dê à estimativa um token próprio, acima de `--t-secao`, e rebaixe o `<h2>` "Resumo da sua
+cotação" a etiqueta, para o destaque ser a primeira coisa em que o olho pousa.
+
+Deixe também a estimativa entrar no próprio tempo — um `delay` curto de opacidade e `y`
+depois de o painel assentar, respeitando `useReducedMotion` — e ponha um filete dourado
+nela. Banco privado não grita, mas **hierarquiza**; hoje a hierarquia está plana e o
+resultado lê como o quarto bloco de uma lista.
+
+**6.6 — A montagem da mensagem do WhatsApp está na camada errada, e agora existem duas.**
+O `contato.js` já é dono de `mensagemWhatsApp` para o botão flutuante, e o `EtapaResumo`
+monta uma segunda, mais rica, inline. É conteúdo puro com regra de domínio real — quais
+campos viajam e quais deliberadamente não —, sem JSX e sem hooks, e hoje só dá para testar
+renderizando um componente e desmontando uma URL.
+
+Extraia para junto do `contato.js`, leve o comentário que explica a omissão do telefone, e
+teste ao lado do `calculo.test.js`. Isso também tira uma responsabilidade do `EtapaResumo`
+sem inventar abstração.
+
+**6.7 — O e-mail passa a viajar na mensagem.** Hoje o campo tem validador, célula na
+grade, `autoComplete` e **nenhum destino**: nada lê `estado.email` além do resumo que o
+devolve para quem digitou. Num portfólio isso lê como formulário pedindo dado pessoal por
+reflexo — ainda mais quatro dedos abaixo de uma linha prometendo "usamos seu telefone só
+para falar sobre esta cotação".
+
+O próprio raciocínio do código aponta a saída: o telefone é omitido porque "o consultor já
+conhece", já que é o número que envia a mensagem. Esse argumento **não vale para o
+e-mail** — é o único dado de contato que uma conversa de WhatsApp não carrega, o que faz
+dele o único campo opcional que vale a pena pedir. Inclua quando preenchido.
+
+**6.8 — Dois botões "Editar" no resumo.** O recap é útil, não enchimento: é a última
+confirmação antes de dados irem para uma pessoa, e mostrar exatamente o que foi capturado é
+um gesto de confiança coerente com a direção visual. Mas ele é inerte, e é justamente para
+isso que o `irPara` deveria existir além do uso defensivo.
+
+Acrescente **dois** (não seis): um no grupo do veículo (`irPara`, etapa 1) e um no grupo de
+contato (`irPara`, etapa 2). Quatro linhas.
+
+Duas ressalvas para registrar: o `irPara` hoje pula o `validarEtapa`, o que só é seguro
+porque todo salto é para trás — se algum dia um "Editar" saltar para a frente, essa guarda
+precisa voltar; e ao pular para a etapa 2 o usuário caminha pela 3 de novo, o que é
+aceitável mas merece ser decisão, não descoberta.
+
+Aproveite e resolva outra ambiguidade do recap: ele mistura em silêncio duas categorias —
+nome, cidade, veículo e valor vão para o consultor; telefone não. Uma linha acima do grupo
+("Enviaremos estes dados ao consultor") separa as coisas.
+
+**6.9 — O `?tipo=` é parâmetro morto e a Tarefa 12 depende dele.** O `veiculos.js` afirma
+que os ids "viajam na URL como `?tipo=` em `/beneficios` e `/cotacao`", a guarda
+`Object.hasOwn` do `calculo.js` se justifica por isso, e o passo 2 da Tarefa 12 termina num
+CTA para `/cotacao?tipo={ativo}`. Nada no `Wizard.jsx` lê `useSearchParams`: do jeito que
+está, esse CTA joga o usuário na etapa 0 sem nada pré-selecionado.
+
+Leia o parâmetro: quando o id for válido, semeie `tipo` e comece na etapa 1.
+
+**6.10 — Ajustes menores.**
+
+- `PainelEtapa` é componente de função simples e o `PopChild` interno do Framer faz
+  `cloneElement(children, {ref})` nele, gerando aviso de console a cada transição. Não é
+  load-bearing (os refs de foco e de `inert` são outros e funcionam), mas envolva em
+  `forwardRef` para calar o ruído.
+- `mascararTelefone` está exportada sem consumidor e sem teste — é o mesmo apontamento que
+  a 8.14 fez sobre os exports do `estadoWizard`. É função pura com casos de borda (6.1 é
+  um deles) num projeto que já tem Vitest. Ou ganha teste, com backspace e cursor como
+  regressão, ou perde o `export`.
+- O `EtapaResumo` recebe `despachar` e portanto conhece o vocabulário de ações do redutor —
+  três formatos de ação fixados numa folha. Receber `aoReiniciar` e `aoVoltarInicio` custa
+  duas linhas no `Wizard.jsx` e deixa o componente testável com props simples. (Receber o
+  `estado` inteiro continua abençoado pela 8.14; o acoplamento ao `despachar` não estava
+  incluído nisso.)
+- O botão do WhatsApp abre em nova aba sem avisar. Trate uma vez no `Botao`, com texto
+  visualmente oculto, e não em cada chamada.
+- O `Intl.NumberFormat` de BRL está local no `EtapaResumo`. Se a Tarefa 12 mostrar qualquer
+  valor, promova para um módulo de formato em vez de instanciar um segundo.
+- O `Campo` está pronto para `ui/`, mas mova na Tarefa 13, não agora: o segundo consumidor
+  é o formulário de contato dela, que precisa de uma coisa que o `Campo` ainda não faz —
+  `textarea`. Planeje a mudança com uma prop de multilinha, em vez de deixar a Tarefa 13
+  copiar a fiação de ARIA, que é exatamente o que a 8.13 existia para evitar.
+
+- [ ] **Step 7: Commit**
 
 ```bash
 git add -A

@@ -1,0 +1,62 @@
+.barra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.mobile {
+  display: none;
+  font-size: var(--t-mini);
+  color: var(--gelo-suave);
+}
+
+.rotulos {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-1);
+}
+
+.rotulo {
+  font-size: var(--t-mini);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color var(--transicao);
+}
+
+.atual {
+  color: var(--gelo);
+}
+
+.concluido {
+  color: var(--dourado);
+}
+
+.futuro {
+  color: var(--gelo-tenue);
+}
+
+.trilho {
+  position: relative;
+  height: 2px;
+  border-radius: var(--raio);
+  background: var(--azul-borda);
+  overflow: hidden;
+}
+
+.preenchimento {
+  position: absolute;
+  inset: 0;
+  background: var(--dourado);
+  transform-origin: left;
+  transition: transform var(--transicao);
+}
+
+@media (max-width: 640px) {
+  .mobile {
+    display: block;
+  }
+
+  .rotulos {
+    display: none;
+  }
+}

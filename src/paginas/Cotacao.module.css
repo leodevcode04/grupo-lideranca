@@ -1,0 +1,4 @@
+.pagina {
+  padding-top: calc(var(--altura-cabecalho) + var(--e-6));
+  padding-bottom: var(--e-7);
+}

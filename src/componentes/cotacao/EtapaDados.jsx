@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import Campo from './Campo.jsx'
+import Campo from '../ui/Campo.jsx'
 import { digitosAntesDoCursor, restaurarCursorPorDigitos } from './cursorPorDigitos.js'
 import estilosEtapa from './etapa.module.css'
 import estilos from './EtapaDados.module.css'

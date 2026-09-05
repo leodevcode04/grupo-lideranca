@@ -1,0 +1,62 @@
+.pagina {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  /* Não passa por `Secao` (não é uma sequência de seções de argumento), então
+     cuida da própria folga sob o header fixo — mesmo padrão de
+     `Cotacao.module.css` e do `Beneficios.module.css` de antes do retrofit. */
+  padding-top: calc(var(--altura-cabecalho) + var(--e-6));
+  padding-bottom: var(--e-6);
+  text-align: center;
+  overflow: hidden;
+}
+
+.numero {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-hero);
+  /* Muito maior que --t-hero na prática: escalado via clamp para ocupar a
+     largura da faixa sem depender de um token novo só para isto. */
+  font-size: clamp(8rem, 28vw, 22rem);
+  color: var(--dourado);
+  opacity: 0.12;
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.conteudo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
+  max-width: 640px;
+}
+
+.titulo {
+  margin: 0;
+  font-size: var(--t-secao);
+  color: var(--gelo);
+}
+
+.texto {
+  margin: 0;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--e-3);
+  margin-top: var(--e-2);
+}

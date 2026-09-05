@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import Abas, { idAba, idPainel } from '../componentes/ui/Abas.jsx'
 import Botao from '../componentes/ui/Botao.jsx'
+import Cabecalho from '../componentes/ui/Cabecalho.jsx'
 import { veiculos, coberturasUniao, coberturasUniversais } from '../dados/veiculos.js'
+import { FOTO_BENEFICIOS } from '../dados/cabecalhos.js'
 import { comLargura } from '../utils/imagem.js'
 import estilos from './Beneficios.module.css'
 
@@ -62,13 +64,14 @@ export default function Beneficios() {
   }
 
   return (
-    <div className={`container ${estilos.pagina}`}>
-      <h1 className={estilos.titulo}>Benefícios por tipo de veículo</h1>
-      <p className={estilos.subtitulo}>
-        Cada categoria tem uma cobertura própria. Escolha o tipo de veículo abaixo para ver
-        exatamente o que está incluído.
-      </p>
-
+    <>
+      <Cabecalho
+        etiqueta="Benefícios"
+        titulo="Benefícios por tipo de veículo"
+        texto="Cada categoria tem uma cobertura própria. Escolha o tipo de veículo abaixo para ver exatamente o que está incluído."
+        foto={FOTO_BENEFICIOS}
+      />
+      <div className={`container ${estilos.pagina}`}>
       <Abas
         itens={itensAba}
         ativo={ativo}
@@ -235,6 +238,7 @@ export default function Beneficios() {
           </table>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   )
 }

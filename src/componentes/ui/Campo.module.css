@@ -35,6 +35,8 @@
   border-radius: var(--raio);
   padding: var(--e-2);
   color: var(--gelo);
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo);
   transition: border-color var(--transicao);
   /* Compensa o header fixo quando o foco de um campo inválido (Tarefa 10,
      8.2) traz a rolagem nativa até aqui. */
@@ -43,6 +45,15 @@
 
 .comPrefixo {
   padding-left: calc(var(--e-2) + 1.5rem);
+}
+
+/* Variante `<textarea>` (Tarefa 13): a única diferença de layout entre os
+   dois usos — redimensionável só verticalmente, altura mínima para caber o
+   `rows` padrão sem o rótulo "pular" quando o campo ainda está vazio. */
+.textarea {
+  resize: vertical;
+  min-height: 6.5rem;
+  line-height: 1.5;
 }
 
 /* A mensagem já diz "campos destacados" (Tarefa 10, 8.8) — a borda vermelha

@@ -1,26 +1,10 @@
-/* Mesma folga do header fixo que `Cotacao.module.css` usa: a página não
-   passa por `Secao` (o conteúdo é um único painel de abas, não uma
-   sequência de seções de argumento), então ela cuida da própria clareza sob
-   o header — não há `.secao:first-child` para herdar. */
+/* Cabeçalho próprio (título centralizado, sem foto) substituído pelo
+   `Cabecalho` de ui/ (Tarefa 13, retrofit decidido na revisão da Tarefa 12).
+   A folga de header não é mais responsabilidade desta página — o
+   `Cabecalho` cuida da própria altura sob o header fixo. */
 .pagina {
-  padding-top: calc(var(--altura-cabecalho) + var(--e-6));
+  padding-top: var(--e-6);
   padding-bottom: var(--e-7);
-}
-
-.titulo {
-  max-width: 880px;
-  margin-inline: auto;
-  font-size: var(--t-secao);
-  text-align: center;
-}
-
-.subtitulo {
-  max-width: 640px;
-  margin-inline: auto;
-  margin-top: var(--e-2);
-  margin-bottom: var(--e-6);
-  color: var(--gelo-suave);
-  text-align: center;
 }
 
 .abas {

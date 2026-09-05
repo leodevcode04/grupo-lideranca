@@ -1,0 +1,155 @@
+.medidaInstitucional {
+  --secao-medida: 880px;
+}
+
+/* Colunas assimétricas 7/5: o texto institucional (mais longo) ocupa a
+   fração maior, os compromissos (lista curta) a menor — não 6/6, que
+   deixaria a lista com folga demais e o texto espremido. */
+.colunas {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--e-6);
+  align-items: start;
+}
+
+.textoLongo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}
+
+.textoLongo p {
+  margin: 0;
+}
+
+.compromissos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin: 0;
+  padding: var(--e-4);
+  list-style: none;
+  background: var(--azul-elevado);
+  border-radius: var(--raio-card);
+  box-shadow: var(--sombra-card);
+  color: var(--gelo);
+  font-size: var(--t-corpo);
+}
+
+.compromissos li {
+  padding-inline-start: var(--e-3);
+  position: relative;
+}
+
+.compromissos li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: var(--e-1);
+  height: 1px;
+  background: var(--dourado);
+}
+
+.faixa {
+  margin-top: var(--e-6);
+}
+
+/* Linha do tempo vertical: trilho contínuo à esquerda, marcador em cada
+   marco, ano fora do fluxo de leitura principal (decorativo — o texto do
+   marco já carrega o sentido cronológico via ordem de leitura, então o ano
+   sozinho não muda o que um leitor de tela lê a mais). */
+.linha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.marco {
+  position: relative;
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: var(--e-4);
+  padding-inline-start: var(--e-4);
+  border-inline-start: 2px solid var(--azul-borda);
+}
+
+.marco::before {
+  content: '';
+  position: absolute;
+  left: calc(-1px - 5px);
+  top: 0.35em;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--dourado);
+}
+
+.ano {
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  color: var(--dourado-claro);
+}
+
+.marcoConteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+}
+
+.marcoTitulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  color: var(--gelo);
+}
+
+.marcoTexto {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}
+
+.ctaConteudo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-5);
+  text-align: center;
+}
+
+.ctaTexto {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+}
+
+.ctaBotoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--e-3);
+}
+
+@media (max-width: 768px) {
+  .colunas {
+    grid-template-columns: 1fr;
+    gap: var(--e-4);
+  }
+
+  .marco {
+    grid-template-columns: 1fr;
+    gap: var(--e-1);
+  }
+
+  .ano {
+    font-size: var(--t-mini);
+  }
+}

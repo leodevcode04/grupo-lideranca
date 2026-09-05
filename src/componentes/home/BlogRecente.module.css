@@ -8,10 +8,10 @@
   gap: var(--e-5);
 }
 
+/* Layout do item dentro desta grade específica — tipografia (categoria,
+   data, título, resumo) já vem de `ui/CardPost.module.css`; aqui só o
+   posicionamento do filete vertical entre colunas. */
 .item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e-1);
   padding-inline-start: var(--e-4);
   border-inline-start: 1px solid var(--azul-borda);
 }
@@ -19,33 +19,6 @@
 .item:first-child {
   padding-inline-start: 0;
   border-inline-start: none;
-}
-
-.categoria {
-  color: var(--dourado);
-  font-size: var(--t-mini);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-variant-caps: all-small-caps;
-}
-
-.data {
-  color: var(--gelo-suave);
-  font-size: var(--t-mini);
-}
-
-.titulo {
-  margin: var(--e-1) 0 0;
-  font-family: var(--fonte-titulo);
-  font-size: var(--t-card);
-  color: var(--gelo);
-}
-
-.resumo {
-  margin: 0;
-  color: var(--gelo-suave);
-  font-size: var(--t-corpo);
 }
 
 /* Alinhado à esquerda, como o resto da banda (Tarefa 8, 7.11) — antes

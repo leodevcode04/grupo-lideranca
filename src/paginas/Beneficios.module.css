@@ -1,0 +1,135 @@
+/* Mesma folga do header fixo que `Cotacao.module.css` usa: a página não
+   passa por `Secao` (o conteúdo é um único painel de abas, não uma
+   sequência de seções de argumento), então ela cuida da própria clareza sob
+   o header — não há `.secao:first-child` para herdar. */
+.pagina {
+  padding-top: calc(var(--altura-cabecalho) + var(--e-6));
+  padding-bottom: var(--e-7);
+}
+
+.titulo {
+  max-width: 880px;
+  margin-inline: auto;
+  font-size: var(--t-secao);
+  text-align: center;
+}
+
+.subtitulo {
+  max-width: 640px;
+  margin-inline: auto;
+  margin-top: var(--e-2);
+  margin-bottom: var(--e-6);
+  color: var(--gelo-suave);
+  text-align: center;
+}
+
+.abas {
+  margin-bottom: var(--e-6);
+}
+
+.painel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'foto texto'
+    'foto coberturas'
+    'foto cta';
+  gap: var(--e-6);
+  align-items: start;
+}
+
+.fotoWrapper {
+  grid-area: foto;
+  border-radius: var(--raio-card);
+  overflow: hidden;
+  box-shadow: var(--sombra-card);
+}
+
+.foto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  /* Tratamento consistente com os cartões de `TiposVeiculo` (Tarefa 8, 7.7:
+     a página não deveria acumular mais uma grade de fotos sem filtro). */
+  filter: grayscale(1);
+}
+
+.texto {
+  grid-area: texto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.nome {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-card);
+  color: var(--gelo);
+}
+
+.chamada {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-corpo);
+  color: var(--dourado-claro);
+}
+
+.descricao {
+  margin: 0;
+  color: var(--gelo-suave);
+  font-size: var(--t-corpo);
+  max-width: 60ch;
+}
+
+.coberturas {
+  grid-area: coberturas;
+}
+
+.subtituloCoberturas {
+  margin: 0 0 var(--e-2);
+  font-family: var(--fonte-titulo);
+  font-size: var(--t-mini);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gelo-suave);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-2) var(--e-3);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--e-1);
+  color: var(--gelo);
+  font-size: var(--t-corpo);
+}
+
+.check {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--dourado);
+}
+
+.cta {
+  grid-area: cta;
+  margin-top: var(--e-2);
+}
+
+@media (max-width: 900px) {
+  .painel {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'foto'
+      'texto'
+      'coberturas'
+      'cta';
+  }
+}

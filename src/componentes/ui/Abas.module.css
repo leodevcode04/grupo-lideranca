@@ -1,0 +1,55 @@
+.tablist {
+  display: flex;
+  gap: var(--e-2);
+  border-bottom: 1px solid var(--azul-borda);
+}
+
+.tab {
+  position: relative;
+  flex: none;
+  padding: var(--e-2) var(--e-3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--gelo-suave);
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--t-corpo);
+  white-space: nowrap;
+  transition: color var(--transicao);
+}
+
+.tab[aria-selected='true'] {
+  color: var(--gelo);
+}
+
+@media (hover: hover) {
+  .tab:hover {
+    color: var(--dourado-claro);
+  }
+}
+
+.indicador {
+  position: absolute;
+  left: var(--e-1);
+  right: var(--e-1);
+  bottom: -1px;
+  height: 2px;
+  border-radius: var(--raio);
+  background: var(--dourado);
+}
+
+/* Abaixo de 640px a régua rola na horizontal em vez de quebrar linha ou
+   espremer os rótulos — os quatro tipos de veículo continuam legíveis num
+   único trilho, com scroll-snap para o dedo "encaixar" numa aba por vez. */
+@media (max-width: 640px) {
+  .tablist {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    scroll-snap-align: start;
+  }
+}

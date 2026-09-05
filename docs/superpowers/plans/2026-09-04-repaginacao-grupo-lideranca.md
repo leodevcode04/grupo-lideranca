@@ -1775,7 +1775,7 @@ seis testes acima fixam `anoAtual: 2026` explicitamente — suíte que começa a
 dia 1º de janeiro é pior que o bug que ela deveria pegar.
 
 Dois testes a mais fecham as brechas: um confirmando que o padrão pega o ano real, e um
-para o guarda de `ano` inválido.  é  e  é ; nenhum
+para o guarda de `ano` inválido. `Number(undefined)` é `NaN` e `Number('')` é `0`; nenhum
 dos dois estoura sozinho, e ambos produziriam um ajuste de idade silenciosamente errado —
 exatamente o tipo de falha que este módulo existe para impedir. A faixa de 1980 a 2026 
 **não** é revalidada aqui: é validação de apresentação, com mensagem para o usuário, e 

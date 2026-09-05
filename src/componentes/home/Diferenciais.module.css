@@ -1,3 +1,7 @@
+.medida {
+  --secao-medida: 720px;
+}
+
 .grade {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -17,13 +21,11 @@
   border-inline-end: none;
 }
 
-.numeral {
-  font-family: var(--fonte-titulo);
-  font-size: var(--t-secao);
-  color: var(--dourado);
-  opacity: 0.25;
-  line-height: 1;
-}
+/* Sem numeral fantasma (01–04): 52px em Fraunces com opacity: .25 é o mesmo
+   corpo e família do <h2> da seção, 30px ao lado — grande demais para
+   rótulo, pequeno demais para arquitetura (Tarefa 7, 6.8). Os filetes de
+   1px entre colunas já fazem o trabalho de separar os quatro itens; não
+   precisam de reforço. */
 
 .titulo {
   margin: 0;

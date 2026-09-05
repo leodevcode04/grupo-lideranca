@@ -19,8 +19,11 @@ export default function TiposVeiculo() {
   return (
     <Secao
       id="tipos-veiculo"
+      fundo="profundo"
+      ar="compacto"
       etiqueta="Coberturas"
       titulo="Proteção para cada tipo de veículo"
+      className={estilos.medida}
     >
       <div className={estilos.grade}>
         {veiculos.map((veiculo, indice) => (

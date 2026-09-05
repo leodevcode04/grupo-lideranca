@@ -1,3 +1,7 @@
+.medida {
+  --secao-medida: 560px;
+}
+
 .grade {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

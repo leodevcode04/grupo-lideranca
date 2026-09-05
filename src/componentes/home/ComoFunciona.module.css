@@ -1,3 +1,7 @@
+.medida {
+  --secao-medida: 680px;
+}
+
 .trilha {
   display: flex;
   gap: var(--e-4);
@@ -14,7 +18,17 @@
    é `flex: 1`, então preenche exatamente o espaço restante do bloco (na
    horizontal aqui, na vertical no mobile) — nunca calcula posição a partir
    de um container cujo tamanho muda com o texto do passo ao lado. É por
-   isso que um título de duas linhas não quebra a linha (ver verificação). */
+   isso que um título de duas linhas não quebra a linha (ver verificação).
+
+   No desktop isso só resolve até a borda da própria coluna: `.trilha` tem
+   `gap` (--e-4) entre colunas, que o conector não enxerga, então ele parava
+   ali e sobrava um vão de 32px até o círculo seguinte (medido em 1440:
+   conector terminando em x=494, próximo círculo em x=526 — três tracinhos
+   soltos, não uma linha). A margem negativa em `.conector`, abaixo, estende
+   o traço por esse gap até encostar. No mobile o gap de `.trilha` já é 0 e
+   o conector muda de eixo (vertical), então a margem negativa é zerada lá
+   — comentário antigo aqui afirmava "encosta exatamente" sem essa ressalva,
+   o que só era verdade no ramo mobile. Ver Tarefa 7, 6.3. */
 .marcador {
   display: flex;
   flex-direction: row;
@@ -40,6 +54,7 @@
   flex: 1;
   height: 0;
   margin-inline-start: var(--e-2);
+  margin-inline-end: calc(-1 * var(--e-4));
   border-top: 2px dashed var(--dourado);
 }
 
@@ -73,10 +88,15 @@
    marcador (rail) à esquerda e o texto à direita via flex-direction: row;
    `align-items: stretch` (padrão) faz o marcador esticar até a MESMA altura
    do bloco de texto — o conector (flex: 1) então preenche do fim do círculo
-   até o fim do texto, e como não há gap entre passos, encosta exatamente no
-   círculo seguinte. Continua conectado mesmo quando um título quebra em
-   duas linhas, porque nunca assume uma altura fixa. */
-@media (max-width: 700px) {
+   até o fim do texto, e como não há gap entre passos (`.trilha` zera o
+   próprio `gap` aqui), encosta exatamente no círculo seguinte sem precisar
+   da margem negativa do ramo desktop — por isso ela é zerada abaixo.
+   Continua conectado mesmo quando um título quebra em duas linhas, porque
+   nunca assume uma altura fixa.
+
+   Breakpoint em ~820px, não 700px: em 701px sobravam três colunas de
+   ~180px com um círculo de 48px — a largura mais feia da página. */
+@media (max-width: 820px) {
   .trilha {
     flex-direction: column;
     gap: 0;
@@ -95,7 +115,7 @@
   .conector {
     width: 0;
     height: auto;
-    margin-inline-start: 0;
+    margin-inline: 0;
     margin-block-start: var(--e-2);
     border-top: none;
     border-left: 2px dashed var(--dourado);

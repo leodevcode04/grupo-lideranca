@@ -1,8 +1,11 @@
-// Copy dos três passos exibidos em `ComoFunciona` (Home). Extraído para
-// `dados/` pela mesma razão que `diferenciais.js` e `depoimentos.js`: é
-// conteúdo que um editor pode querer mudar sem tocar no JSX. O layout (grid
-// de 3 colunas + conector) assume exatamente estes três itens — o mesmo tipo
-// de acoplamento que `Diferenciais` já tem com 4 itens e `FaixaNumeros` com 4.
+// Copy dos passos exibidos em `ComoFunciona` (Home). Extraído para `dados/`
+// pela mesma razão que `diferenciais.js` e `depoimentos.js`: é conteúdo que
+// um editor pode querer mudar sem tocar no JSX. Ao contrário do que um
+// comentário anterior aqui afirmava, o layout NÃO assume exatamente três
+// itens: `.trilha` é flex com `.passo { flex: 1 }`, e o conector só aparece
+// quando `indice < passos.length - 1`. Um quarto passo funciona — só fica
+// mais estreito, já que a largura da coluna é dividida igualmente. Ver
+// Tarefa 7, 6.9.
 export const passos = [
   {
     id: 'cotacao',

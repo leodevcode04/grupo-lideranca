@@ -1,10 +1,40 @@
 .secao {
+  /* padding-block vem de .compacto/.padrao/.amplo (prop `ar`), sempre uma
+     das três — nunca um valor solto aqui. Ver Tarefa 7, 6.6. */
+}
+
+/* Prop `ar`: escala o respiro vertical e o vão entre cabeçalho e conteúdo.
+   Seções de argumento (Diferenciais, Depoimentos) usam `amplo`; seções
+   utilitárias (TiposVeiculo, BlogRecente) usam `compacto`. Sem isso, "por
+   que nos escolher" e "como contratar" recebem exatamente o mesmo ar. */
+.compacto {
+  padding-block: calc(var(--e-secao) * 0.65);
+}
+
+.padrao {
   padding-block: var(--e-secao);
+}
+
+.amplo {
+  padding-block: calc(var(--e-secao) * 1.35);
+}
+
+.compacto .container {
+  gap: var(--e-4);
+}
+
+.padrao .container {
+  gap: var(--e-6);
+}
+
+.amplo .container {
+  gap: var(--e-7);
 }
 
 /* Folga do header fixo: só a primeira seção de cada página precisa dela — é
    quem decide se quer sangrar sob o header (não é o caso de Secao) ou não.
-   Ver passo 8 da Tarefa 5 no plano. */
+   Ver passo 8 da Tarefa 5 no plano. Só `padding-top`: o `padding-block` de
+   cima continua decidindo o resto pela classe de `ar`. */
 .secao:first-child {
   padding-top: calc(var(--e-secao) + var(--altura-cabecalho));
 }
@@ -31,7 +61,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--e-2);
-  max-width: 640px;
+  /* Medida (largura da coluna de conteúdo) varia por seção via
+     `--secao-medida`, definida pelo `className` do chamador no elemento
+     `<section>` — a custom property herda até aqui sem o `Secao` precisar
+     conhecer quem a define. 640px é o valor de antes, agora só o padrão. */
+  max-width: var(--secao-medida, 640px);
 }
 
 .centralizado {

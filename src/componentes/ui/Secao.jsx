@@ -8,6 +8,7 @@ export default function Secao({
   titulo,
   subtitulo,
   fundo = 'noite',
+  ar = 'padrao',
   centralizado = false,
   className,
   children,
@@ -16,7 +17,16 @@ export default function Secao({
   const temCabecalho = etiqueta || titulo || subtitulo
   const idTitulo = id && titulo ? `${id}-titulo` : undefined
 
-  const classeBase = `${estilos.secao} ${estilos[fundo] ?? estilos.noite}`
+  // Etiqueta sem título faz o `<h2>` não ser emitido: os `<h3>` dos filhos se
+  // penduram no `<h2>` da seção anterior no sumário de títulos, e a seção
+  // fica sem `aria-labelledby` resolvido (undefined). Ver Tarefa 7, 6.2.
+  if (import.meta.env.DEV && etiqueta && !titulo) {
+    console.warn(
+      `Secao: etiqueta "${etiqueta}" sem "titulo" — a seção não emite <h2> e fica sem nome acessível.`
+    )
+  }
+
+  const classeBase = `${estilos.secao} ${estilos[fundo] ?? estilos.noite} ${estilos[ar] ?? estilos.padrao}`
   const classeFinal = className ? `${classeBase} ${className}` : classeBase
 
   return (

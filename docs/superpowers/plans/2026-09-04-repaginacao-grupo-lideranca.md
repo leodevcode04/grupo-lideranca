@@ -1342,7 +1342,7 @@ pausado no hover e desligado sob `prefers-reduced-motion`.
 Expected: os reveals disparam ao rolar; o carrossel troca sozinho e responde aos
 controles; nada estoura em 375px.
 
-- [ ] **Step 6: Correções apontadas na revisão**
+- [x] **Step 6: Correções apontadas na revisão**
 
 A engenharia está boa — o timer está certo, o CSS é pensado, os comentários explicam
 motivo e não sintaxe. O que escapou foram três problemas de acessibilidade no carrossel,

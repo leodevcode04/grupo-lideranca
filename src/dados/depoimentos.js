@@ -1,3 +1,9 @@
+// Os três depoimentos variam de propósito: comprimento, arco narrativo e
+// final diferentes, para não lerem como o mesmo texto reescrito três vezes
+// (incidente → resposta rápida → recomendação, sempre). Ver Tarefa 7, 6.5.
+// As três cidades ficam dentro do "Sul de Santa Catarina" que a etiqueta do
+// Hero afirma (Tarefa 6, 5.4) — o depoimento que citava Porto Alegre — RS
+// trocou de cidade por esse motivo.
 export const depoimentos = [
   {
     id: 1,
@@ -5,7 +11,7 @@ export const depoimentos = [
     cidade: 'Tubarão — SC',
     nota: 5,
     texto:
-      'Precisei acionar a assistência depois de um problema mecânico na BR e fui muito bem atendido. O guincho chegou rápido e resolveram tudo com atenção. Recomendo o Grupo Liderança para quem busca tranquilidade.',
+      'Quebrei na BR, de noite, com a família no carro. Liguei e em quarenta minutos o guincho já estava lá. Não teve pergunta repetida nem "aguarde na linha" — foi direto ao ponto.',
   },
   {
     id: 2,
@@ -13,14 +19,14 @@ export const depoimentos = [
     cidade: 'Criciúma — SC',
     nota: 5,
     texto:
-      'O atendimento fez toda a diferença num momento difícil. Fui orientada em cada etapa, sem enrolação, e senti que realmente tinham interesse em resolver o meu caso. Hoje indico para amigos e familiares.',
+      'Já uso a assistência há dois anos e nunca precisei ler letra miúda pra entender o que está coberto.',
   },
   {
     id: 3,
     nome: 'Rogério Antunes',
-    cidade: 'Porto Alegre — RS',
-    nota: 5,
+    cidade: 'Araranguá — SC',
+    nota: 4,
     texto:
-      'A agilidade do processo me surpreendeu. Depois de um susto com a moto, o suporte foi rápido e a equipe manteve contato o tempo todo. É a segurança que eu procurava para andar mais tranquilo.',
+      'Depois do susto com a moto, o que mais pesou foi o silêncio: ninguém sumia no chat, ninguém empurrava pra depois. Levou dois dias até o conserto sair, e em nenhum deles fiquei sem retorno.',
   },
 ]

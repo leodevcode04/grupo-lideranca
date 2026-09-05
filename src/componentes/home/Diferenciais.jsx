@@ -5,7 +5,14 @@ import estilos from './Diferenciais.module.css'
 
 export default function Diferenciais() {
   return (
-    <Secao id="diferenciais" fundo="profundo" etiqueta="Por que o Grupo Liderança">
+    <Secao
+      id="diferenciais"
+      fundo="noite"
+      ar="amplo"
+      etiqueta="Por que o Grupo Liderança"
+      titulo="O que muda quando você é associado"
+      className={estilos.medida}
+    >
       <div className={estilos.grade}>
         {diferenciais.map((item, indice) => (
           <Revelar
@@ -14,9 +21,6 @@ export default function Diferenciais() {
             atraso={indice * 90}
             className={estilos.item}
           >
-            <span className={estilos.numeral} aria-hidden="true">
-              {String(indice + 1).padStart(2, '0')}
-            </span>
             <h3 className={estilos.titulo}>{item.titulo}</h3>
             <p className={estilos.texto}>{item.texto}</p>
           </Revelar>

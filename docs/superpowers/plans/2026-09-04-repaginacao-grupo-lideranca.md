@@ -1306,7 +1306,7 @@ git commit -m "Adiciona hero e seção de tipos de veículo"
 
 ---
 
-### Task 7: Home — Diferenciais, Como funciona e Depoimentos
+### Task 7: Home — Diferenciais, Como funciona e Depoimentos ✅ (revisada)
 
 **Files:**
 - Create: `src/componentes/home/Diferenciais.jsx` + `.module.css`
@@ -1342,7 +1342,143 @@ pausado no hover e desligado sob `prefers-reduced-motion`.
 Expected: os reveals disparam ao rolar; o carrossel troca sozinho e responde aos
 controles; nada estoura em 375px.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Correções apontadas na revisão**
+
+A engenharia está boa — o timer está certo, o CSS é pensado, os comentários explicam
+motivo e não sintaxe. O que escapou foram três problemas de acessibilidade no carrossel,
+uma quebra no sumário de títulos herdada do plano, um conector que não conecta, e um
+problema estrutural de design: depois do hero, os 2.200px seguintes são quatro cabeçalhos
+idênticos sobre três grades idênticas com respiro constante. Restrição sem variação não é
+restrição, é template.
+
+**6.1 — O carrossel sai; os três depoimentos ficam visíveis.** Decisão tomada com o
+usuário. Com avanço automático de 7s, quem passa os olhos vê **um** depoimento e não
+percebe que há outros — três bolinhas de 8px no rodapé de uma coluna centralizada não
+comunicam isso. Depoimento é conteúdo de força cumulativa: três vozes de três cidades é o
+argumento, uma é anedota.
+
+Substitua por uma grade de três a partir de 900px, empilhando abaixo disso. Reaproveite o
+tratamento de divisores do `Diferenciais` (filete de 1px em `--azul-borda` entre colunas,
+sem moldura de card) para a seção ficar quieta. Mantenha `Estrelas` e o Fraunces itálico.
+
+Isso apaga toda a camada de estado do `Depoimentos.jsx` e com ela, de uma vez: o anúncio
+de `aria-live` a cada 7s (que interrompia a leitura do usuário — o padrão APG manda
+`off` durante rotação automática), os alvos de 8×8px das bolinhas (o mínimo AA do WCAG
+2.5.8 é 24×24, e `transform: scale()` não aumenta área de clique), o pulo de layout de
+26px a cada avanço, o `aria-label` num `<div>` sem role (que a tecnologia assistiva
+descarta), a transição de `background` nas bolinhas e os `:hover` sem guarda de
+`@media (hover: hover)`.
+
+O `“` gigante vai como marca d'água atrás da coluna do meio, onde tem composição para
+sustentá-lo — hoje ele paira 90px acima do texto que deveria abrir, ancorado numa caixa
+cuja largura ninguém controla de propósito (o `max-width: 760px` do `.carrossel` é letra
+morta: a largura real é 620px, herdada do `.texto`).
+
+Framer continua demonstrado no acordeão (Tarefa 8), nas abas (12) e no wizard (10–11).
+
+**6.2 — `Diferenciais` precisa de `titulo`.** Passar só `etiqueta` faz o `Secao` não
+emitir `<h2>`, então os quatro `<h3>` da seção se penduram no `<h2>` da seção anterior: um
+leitor de tela navegando por títulos lê "Adesão sem burocracia" como um quinto tipo de
+veículo. A seção também fica sem nome acessível (`aria-labelledby` resolve para
+`undefined`). Visualmente é a única cujo cabeçalho é uma etiqueta solta sobre uma grade, o
+que lê como inacabado.
+
+O plano não pediu título — o defeito é meu. Dê um título de verdade à seção.
+
+E torne isso difícil de repetir: no `Secao`, avise em desenvolvimento quando vier
+`etiqueta` sem `titulo`. A Tarefa 8 tem um `CtaFinal` que plausivelmente cai no mesmo
+caso.
+
+**6.3 — O conector do `ComoFunciona` não conecta.** `.trilha` tem `gap: var(--e-4)` (32px)
+e o conector é `flex: 1` **dentro** do `.passo`, então ele só alcança a borda direita da
+própria coluna. Medido em 1440: o conector 1 termina em x=494 e o círculo 2 começa em
+x=526. Em 760px o vão de 32px come 22% de um traço de 143px. No desktop a leitura é de
+três tracinhos saindo dos círculos, não de uma linha ligando-os — parece bug de
+renderização, não diagrama.
+
+Pior: o comentário no CSS afirma que o conector "encosta exatamente no círculo seguinte",
+o que só é verdade no ramo mobile, onde o `gap` é 0. Comentário confiantemente errado é
+pior que comentário nenhum. Corrija os dois.
+
+Suba também o breakpoint da virada de 700px para ~820px: em 701px sobram três colunas de
+~180px com círculo de 48px, que é a largura mais feia da página.
+
+**6.4 — Contradição factual entre seções vizinhas.** `diferenciais.js` promete "vistoria
+simples e proteção ativa **no mesmo dia**"; o passo 2 do `comoFunciona.js`, 600px abaixo,
+diz "**agende** a vistoria do veículo na unidade mais próxima". Não dá para agendar visita
+a uma unidade e estar coberto no mesmo dia. Mesma categoria do "desde 2016 / 9 anos" do
+hero. Escolha uma das duas afirmações.
+
+**6.5 — Copy.** Três correções:
+
+- `diferenciais.js` traz "o melhor custo-benefício do segmento" — superlativo não
+  verificável, exatamente o registro que a correção 5.5 rejeitou no hero. Troque por algo
+  que um associado consiga conferir.
+- Os três depoimentos têm comprimento quase idêntico e percorrem o mesmo arco (incidente
+  → resposta rápida → recomendo), todos terminando em recomendação. Lidos em sequência
+  soam gerados — o que num portfólio é pior que dois depoimentos que não rimam. Varie
+  comprimento, arco e final. E um deles é de Porto Alegre, RS, fora do "Sul de Santa
+  Catarina" que a etiqueta do hero agora afirma: troque a cidade ou ajuste a afirmação.
+- O `<h2>` do `Depoimentos` é o único da página que nomeia o próprio tipo de componente em
+  vez de dizer alguma coisa ("Proteção para cada tipo de veículo", "Do orçamento à
+  proteção ativa", … "Depoimentos"). Escreva uma frase.
+
+**6.6 — Ritmo visual: variação de respiro e sequência de fundos.** Decisão tomada com o
+usuário; corrigir agora, com quatro seções, e não na Tarefa 14 com oito.
+
+*Respiro.* Hoje toda seção usa `padding-block: var(--e-secao)` e um vão de `--e-6` entre
+cabeçalho e conteúdo, então o argumento de "por que nos escolher" e a mecânica de "como
+contratar" recebem exatamente o mesmo ar. Acrescente ao `Secao` uma prop `ar`
+(`'compacto' | 'padrao' | 'amplo'`, padrão `'padrao'`) que escala o padding vertical e o
+vão do cabeçalho. Use `amplo` nas seções de argumento (Diferenciais, Depoimentos) e
+`compacto` nas utilitárias (TiposVeiculo, BlogRecente).
+
+*Medida.* O `Secao` já aceita `className`; use-o para variar a largura da coluna de
+conteúdo por seção em vez de deixar todas em 640px.
+
+*Fundos.* A sequência atual (`noite → noite → profundo → noite → elevado`) não codifica
+nada, e a emenda entre o hero e o `TiposVeiculo` é invisível: mesma cor, separadas só por
+padding. Regra para as oito seções:
+
+| Seção | `fundo` |
+|---|---|
+| Hero | `noite` (com foto) |
+| TiposVeiculo | `profundo` |
+| Diferenciais | `noite` |
+| ComoFunciona | `profundo` |
+| Depoimentos | `elevado` |
+| BlogRecente | `noite` |
+| FAQ | `profundo` |
+| CtaFinal | `noite` com halo dourado |
+
+Alterna de forma limpa, quebra a emenda invisível sob o hero e reserva o `elevado` para um
+único momento — a prova social —, dando a ele significado em vez de ser mais uma listra.
+
+**6.7 — Escalonar os três passos do `ComoFunciona`.** É a seção mais diagramática da
+página e hoje aparece pronta de uma vez, enquanto a de cima se conta em quatro tempos.
+Envolva cada passo em `Revelar` com `atraso={índice * 90}`: o conector passa a ler como
+caminho sendo desenhado. Barato e de retorno alto.
+
+**6.8 — Os numerais fantasma: assuma ou remova.** `.numeral` computa 52px em Fraunces com
+`opacity: .25` — exatamente o mesmo corpo e família do `<h2>` da seção, 30px ao lado.
+Grande demais para rótulo, pequeno demais para arquitetura. Ou leve para a escala
+`--t-hero` e deixe viver atrás do título como textura, ou remova e deixe os filetes entre
+colunas fazerem o trabalho — eles já são o recurso mais confiante daquela seção.
+
+**6.9 — Ajustes menores.**
+
+- O comentário do `comoFunciona.js` afirma que o layout "assume exatamente estes três
+  itens". Não assume: `.trilha` é flex com `.passo { flex: 1 }` e o conector é guardado
+  por `indice < passos.length - 1`. Um quarto passo funciona, só fica estreito. Documentar
+  restrição que não existe faz a Tarefa 13 duplicar o arquivo em vez de reusar o padrão.
+- `gap: 0.125rem` literal no `Depoimentos.module.css`.
+- Setas e glifos (`←`, `→`, `❚❚`, `“`) são texto cru e caem na cadeia de fallback da fonte;
+  `❚❚` é caractere de desenho de caixa, não ícone de pausa, com risco real de tofu. O que
+  sobreviver à reescrita vira SVG inline, como o `Estrelas` já faz.
+- Deixe comentado o que qualquer `min-height` mágico está protegendo, para a Tarefa 14
+  saber se pode mexer.
+
+- [ ] **Step 7: Commit**
 
 ```bash
 git add -A

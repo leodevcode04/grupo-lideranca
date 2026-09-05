@@ -1962,7 +1962,7 @@ function validarEtapa(estado) {
     if (!estado.marca.trim()) erros.marca = 'Informe a marca'
     if (!estado.modelo.trim()) erros.modelo = 'Informe o modelo'
     if (!/^\d{4}$/.test(estado.ano)) erros.ano = 'Ano com 4 dígitos'
-    else if (Number(estado.ano) < 1980 || Number(estado.ano) > 2026) erros.ano = 'Ano fora do intervalo'
+    else if (Number(estado.ano) < 1980 || Number(estado.ano) > ANO_LIMITE) erros.ano = 'Ano fora do intervalo'
     if (!(Number(estado.valor) > 0)) erros.valor = 'Informe o valor do veículo'
   }
   if (estado.etapa === 2) {
@@ -1976,6 +1976,12 @@ function validarEtapa(estado) {
 ```
 
 O e-mail é opcional; se preenchido, precisa ser válido.
+
+`ANO_LIMITE` é `new Date().getFullYear()`, **não** o literal `2026`. Um limite fixo
+recusaria um veículo 2027 legítimo a partir de janeiro, que é o mesmo bug de deriva
+silenciosa que a Tarefa 9 tirou do `calculo.js` — e agora é o `calculo.js` quem sabe o
+que é "ano corrente". Modelos de fábrica saem antes do ano-calendário, então considere
+`getFullYear() + 1` como limite.
 
 - [ ] **Step 3: `BarraProgresso`**
 

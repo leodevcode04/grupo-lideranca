@@ -1487,7 +1487,7 @@ git commit -m "Adiciona diferenciais, como funciona e depoimentos"
 
 ---
 
-### Task 8: Home — Blog recente, FAQ e CTA final
+### Task 8: Home — Blog recente, FAQ e CTA final ✅ (revisada)
 
 **Files:**
 - Create: `src/componentes/ui/Acordeao.jsx` + `.module.css`
@@ -1534,7 +1534,175 @@ BlogRecente · FAQ · CtaFinal.
 Expected: o acordeão abre um item por vez com animação suave, navegável por teclado
 (Tab e Enter); a home inteira rola sem quebra de layout em 375px, 768px e 1440px.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Correções apontadas na revisão**
+
+A home inteira existe. O veredito da revisão: bate o "SaaS escuro genérico", mas ainda é
+um template bem executado, não uma composição. As correções abaixo fecham a página e
+limpam três coisas em `ui/` que as Tarefas 10 a 13 herdariam.
+
+**7.1 — Painéis fechados do acordeão continuam na árvore de acessibilidade.** Medidos os
+dez em repouso: `height: 0`, `overflow: hidden`, `visibility: visible`, sem `aria-hidden`,
+sem `hidden`, sem `inert`. Altura zero com `overflow: hidden` **não** poda a subárvore da
+acessibilidade: quem usa leitor de tela ouve as dez respostas enquanto todos os botões
+informam `aria-expanded="false"`.
+
+Aplique `visibility: hidden` (ou `inert`) quando a animação de fechamento assentar — a
+máquina de `assentado` já existe para pendurar isso.
+
+E corrija o comentário das linhas 20–23, que diagnostica errado: ele diz que o passo de
+`overflow: visible` "salva o anel de foco de um link dentro da resposta". O risco real de
+um link futuro é ele ser **tabulável com o painel fechado**, e `overflow: visible` não faz
+nada quanto a isso. Mesma categoria do comentário confiantemente errado do conector (6.3).
+
+**7.2 — `Revelar` sai de dentro do `Acordeao`.** Uma primitiva de `ui/`, que o plano
+define como "sem domínio", não decide a própria coreografia de scroll. O custo concreto:
+os painéis das abas da Tarefa 12 montam na troca de aba, então um acordeão dentro de um
+painel refaz a animação de entrada toda vez que se volta àquela aba.
+
+Mova o reveal para o `FAQ.jsx`, envolvendo o acordeão inteiro num único `Revelar` com
+`margem` generosa. Isso também resolve o escalonamento de 810ms no décimo item: numa tela
+alta os dez entram na região do observador ao mesmo tempo, e o último aparecendo 810ms
+depois do primeiro lê como travamento, não como cadência.
+
+**7.3 — `Acordeao` está moldado no FAQ, não genérico.** Três mudanças para ele valer o
+lugar em `ui/`:
+
+- Renomeie os campos de `pergunta`/`resposta` para `titulo`/`conteudo`. O código não tem
+  conhecimento de domínio; a API tem.
+- Aceite **nó**, não só string. Hoje o `conteudo` é renderizado dentro de um `<p>`, então o
+  componente não comporta uma lista nem um link — que é exatamente onde ele ganharia o
+  lugar dele nas Tarefas 12 e 13.
+- Avise em desenvolvimento quando `itens` vier inválido, como `Botao` e `Secao` já fazem.
+  Hoje o `.map` simplesmente estoura.
+
+Mantenha "um aberto por vez" fixo, **sem** virar prop: com um único chamador, uma prop
+`multiplo` é generalidade especulativa. Acrescente quando a Tarefa 12 ou 13 precisar.
+
+Documente `tituloComo` e `className`, que foram acréscimos bons mas não estão no contrato
+escrito.
+
+**7.4 — O FAQ tem dois alinhamentos brigando.** Medido em 1440: a borda esquerda do `<h2>`
+fica em x=121 (o gutter do container) e a do acordeão em x=283, porque o
+`FAQ.module.css` centraliza uma caixa de 860px dentro do container de 1280px enquanto o
+cabeçalho continua colado à esquerda. 162px de deslocamento entre um título e aquilo que
+ele intitula lê como erro. Passe `centralizado` ao `Secao` ou tire o `margin-inline: auto`.
+
+**7.5 — O `sizes` do `BlogRecente` não bate com o próprio breakpoint.** O JSX declara
+`(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw`, mas o CSS colapsa para uma
+coluna em **768px**. Entre 641px e 768px o card é de largura cheia enquanto o `sizes` diz
+50vw — subdimensionamento de 2×, ou seja, capa visivelmente mole na maioria dos tablets e
+celulares grandes em retrato. Verificado em 700px: card renderiza 630px contra 350px
+declarados. Alinhe os dois números.
+
+**7.6 — `Secao` precisa de um encaixe de decoração.** O `CtaFinal` alcança as entranhas do
+`Secao` com `.halo :global(.container)` para erguer o cabeçalho acima da própria
+decoração. O comentário é honesto quanto ao motivo, mas o padrão vaza: as Tarefas 12 e 13
+vão copiá-lo.
+
+Dê ao `Secao` um encaixe declarado — uma prop `decoracao` renderizada atrás de um container
+sempre elevado — para o padrão existir uma vez em vez de ser redescoberto três.
+
+Aproveite e avise em desenvolvimento quando `centralizado` e `--secao-medida` vierem
+juntos: o `.centralizado` sobrescreve a medida em silêncio, e o `CtaFinal` já carrega uma
+declaração morta por causa disso.
+
+**7.7 — Reescrever o `BlogRecente` e movê-lo para depois do FAQ.** Dois problemas se
+resolvem na mesma mudança.
+
+*O arco quebra ali.* Lida como um documento, a página é: promessa → o que cobre → por que
+nós → como funciona → prova → **blog** → objeções → pedido. Seis das oito seções avançam um
+argumento. O blog não diz nada sobre o produto, termina em beco sem saída por projeto, e
+está exatamente entre o pico emocional (os três depoimentos) e o tratamento de objeções
+que deveria apertar rumo ao fechamento. A sequência é prova → objeções → pedido; "eis alguns
+artigos" vem depois dela.
+
+*É a quinta grade de fotos seguida.* E as três capas são as **únicas** imagens sem filtro
+da página (hero em `saturate(0.5)`, capas de veículo em `grayscale(1)`, blog em `none`),
+então a seção que menos avança o argumento é a banda mais barulhenta — com um esportivo
+vermelho ilustrando um post sobre feira regional.
+
+Reescreva como lista tipográfica de três colunas: categoria em versalete dourado, data,
+título em Fraunces, resumo, filetes de 1px entre as colunas. **Sem capas.** Custa menos
+código do que existe hoje, tira a quinta grade de fotos, elimina o problema da foto de
+banco de imagem, torna o "não clicável" completamente natural (ninguém espera clicar numa
+bibliografia) e acrescenta a variedade compositiva que falta.
+
+Nova ordem: Hero · TiposVeiculo · Diferenciais · ComoFunciona · Depoimentos · FAQ ·
+BlogRecente · CtaFinal. Fundos correspondentes:
+
+| Seção | `fundo` |
+|---|---|
+| Hero | `noite` |
+| TiposVeiculo | `profundo` |
+| Diferenciais | `noite` |
+| ComoFunciona | `profundo` |
+| Depoimentos | `elevado` |
+| FAQ | `profundo` |
+| BlogRecente | `noite` |
+| CtaFinal | `profundo` (o mais escuro fecha a página) |
+
+**7.8 — O `CtaFinal` tem peso, mas não tem finalidade.** Três ajustes:
+
+*O halo não lê como luz.* `rgba(198,160,74,0.32)` com parada `transparent` em 60% num
+`circle at 50% 35%` de uma caixa com inset −20% dá um raio de ~767px — quase a seção
+inteira. Composto sobre o azul a 32%, vira uma névoa oliva-amarronzada, mais visível em
+375px onde toma a banda toda: lê como sujeira, não como brilho. Halo quer **raio menor,
+croma maior e alfa menor** — tente `--dourado-claro` a ~0.18 com a parada transparente
+perto de 40%, para ler como fonte de luz.
+
+*Nada nele diz "último".* Estruturalmente é o mesmo `Secao` das outras sete. Uma banda de
+fechamento ganha finalidade por mudança de **espécie** — um filete, uma assinatura, uma
+mudança de textura — não por um número maior.
+
+*A hierarquia briga consigo.* O telefone tem 88px e domina; o botão primário tem 15px e é o
+**quarto** "Fazer cotação" da página (header fixo, hero, ComoFunciona, aqui). Visualmente a
+página pede que se ligue; a hierarquia de botões pede um formulário já oferecido três
+vezes. Escolha um. O movimento de banco privado: rotular o número ("Central de
+atendimento"), pô-lo em 40–48px e não 88 (um número dourado de 88px sem rótulo lê outdoor
+de call center), e rebaixar "Fazer cotação" para contorno. Aí o fim oferece algo que a
+página ainda não ofereceu três vezes.
+
+Guarde a rima que ninguém escreveu: o telefone resolvia em exatamente `--t-hero`, o mesmo
+corpo do `<h1>`. Se reduzir, **crie um token próprio** em vez de consumir `--t-hero`, que
+acopla dois componentes sem relação por um token com nome de outro.
+
+**7.9 — Quebrar uma das grades em layout assimétrico.** A correção 6.6 variou o *respiro* e
+isso funcionou, mas o diagnóstico era "cabeçalhos idênticos sobre grades idênticas" — e as
+grades continuam idênticas. Todas as oito seções também são **entradas** do mesmo jeito:
+etiqueta, `<h2>` de 52px, subtítulo opcional, tudo colado à esquerda no gutter. Oito vezes.
+
+Refaça o `Diferenciais` com o cabeçalho preso numa coluna à esquerda e os quatro itens
+empilhados numa coluna à direita (algo como 5/7), colapsando para uma coluna no mobile.
+Isso quebra a monotonia de entrada e diferencia o `Diferenciais` do `Depoimentos`, que
+hoje são quase o mesmo objeto a 1.600px de distância.
+
+**7.10 — Colapsar os 34 IntersectionObservers em um.** A página cria **34** observadores no
+mount (tipos 5, diferenciais 5, comoFunciona 4, depoimentos 4, blog 4, faq 11, cta 1). Cada
+um se desconecta após disparar, então em repouso é zero — não é problema de runtime, é de
+forma, e vai piorar com as Tarefas 12 e 13.
+
+Um único observador de escopo de módulo dentro do `useRevelar`, com um `Map` de elemento →
+setter, colapsa os 34 em 1 **sem mudar a API do `Revelar`** e sem tocar em nenhum chamador.
+Fazer agora custa um arquivo; fazer na Tarefa 14 obriga a reverificar o reveal de oito
+seções em mais três rotas.
+
+**7.11 — Ajustes menores.**
+
+- `CtaFinal.module.css` escreve `rgba(198, 160, 74, 0.32)` — o `--dourado` soletrado em
+  componentes RGB. O projeto já tem o mecanismo: crie `--dourado-rgb` no `tokens.css`, como
+  já existe `--azul-noite-rgb`.
+- O link do telefone não tem contexto acessível: um leitor de tela anuncia só "link, 0800
+  150 5050". O rótulo pedido em 7.8 resolve os dois problemas de uma vez.
+- Dez `role="region"` criam dez landmarks. O padrão APG recomenda `role="region"` em painel
+  de acordeão só quando são poucos; dez passa disso.
+- `abertoInicial` é semente de `useState`, portanto só vale na montagem, e isso não está
+  documentado. A Tarefa 13, se for abrir um item por link, vai precisar de `key` ou de modo
+  controlado.
+- "Ver todos" está `align-self: center` numa banda inteiramente alinhada à esquerda.
+- `Botao.module.css` usa `transition: var(--transicao)` sem propriedade, o que resolve para
+  `transition-property: all` em **todo** CTA do site. Declare as propriedades.
+
+- [ ] **Step 8: Commit**
 
 ```bash
 git add -A

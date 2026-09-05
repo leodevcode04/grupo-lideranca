@@ -69,8 +69,8 @@ export default function Hero() {
           </motion.h1>
 
           <motion.p className={estilos.paragrafo} {...entrada(2)}>
-            Assistência 24 horas, vistoria simples e adesão sem burocracia —
-            proteção ativa no mesmo dia.
+            Assistência 24 horas, adesão sem análise de perfil e vistoria na
+            unidade mais próxima.
           </motion.p>
 
           <motion.div className={estilos.botoes} {...entrada(3)}>

@@ -104,11 +104,21 @@
 }
 
 .telefone {
+  position: relative;
   align-self: flex-start;
   margin-top: var(--e-1);
   color: var(--dourado);
   font-weight: 600;
   text-decoration: none;
+}
+
+/* Alvo de toque real de 44px sem inchar o texto visualmente (revisão, 8.1):
+   `::after` esticado estende a área clicável para cima e para baixo, mantendo
+   a caixa do link do tamanho do próprio texto (118×26px medido). */
+.telefone::after {
+  content: '';
+  position: absolute;
+  inset: -9px 0;
 }
 
 @media (hover: hover) {

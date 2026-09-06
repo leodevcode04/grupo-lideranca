@@ -165,7 +165,7 @@ export default function Beneficios() {
                     )}
                     <span>
                       {cobertura}
-                      <span className={estilos.somenteLeitor}>
+                      <span className="sr-only">
                         {presente ? ', incluído' : ', não incluído'}
                         {exclusiva ? ' — diferencial deste veículo' : ''}
                       </span>
@@ -226,7 +226,7 @@ export default function Beneficios() {
                         ) : (
                           <span aria-hidden="true">–</span>
                         )}
-                        <span className={estilos.somenteLeitor}>
+                        <span className="sr-only">
                           {presente ? 'Incluído' : 'Não incluído'}
                         </span>
                       </td>

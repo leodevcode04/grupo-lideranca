@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { comLargura } from '../../utils/imagem.js'
 import Etiqueta from './Etiqueta.jsx'
 import Revelar from './Revelar.jsx'
@@ -13,7 +14,9 @@ import estilos from './Cabecalho.module.css'
 // tem uma foto que faça sentido (não há consumidor assim hoje, mas a prop é
 // opcional por contrato, não por acidente).
 export default function Cabecalho({ etiqueta, titulo, texto, foto }) {
-  const idTitulo = 'cabecalho-titulo'
+  // `useId` (não um id fixo): dois `Cabecalho` na mesma página duplicariam o
+  // id — mesma forma que a correção 4.10 apontou no `Abas` (revisão, 8.12).
+  const idTitulo = useId()
 
   return (
     <header className={`${estilos.cabecalho} grao`}>

@@ -58,9 +58,10 @@
 }
 
 /* Linha do tempo vertical: trilho contínuo à esquerda, marcador em cada
-   marco, ano fora do fluxo de leitura principal (decorativo — o texto do
-   marco já carrega o sentido cronológico via ordem de leitura, então o ano
-   sozinho não muda o que um leitor de tela lê a mais). */
+   marco. O ano é um `<time>` de verdade (revisão, 8.4) — nenhum dos textos
+   de `marcos` (quemSomos.js) contém o próprio ano, então escondê-lo de
+   tecnologia assistiva (como o comentário anterior aqui afirmava) deixava
+   quem usa leitor de tela com uma linha do tempo sem tempo. */
 .linha {
   display: flex;
   flex-direction: column;

@@ -73,6 +73,23 @@ ol {
   padding-inline: clamp(1.25rem, 5vw, 3rem);
 }
 
+/* Utilitário de texto visualmente oculto — lido por tecnologia assistiva,
+   removido da tela sem usar `display: none` (que também o tiraria da árvore
+   de acessibilidade). Existia como cópia byte a byte em cinco módulos
+   (`Wizard`, `Botao`, `Beneficios`, `Blog`, `Contato`); centralizado aqui na
+   revisão da Tarefa 13 (8.12). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Aplique em qualquer seção que precise da textura. O elemento vira contexto de
    posicionamento e recorta a própria textura — o consumidor não precisa lembrar disso. */
 .grao {

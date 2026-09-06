@@ -44,7 +44,7 @@ export default function Botao({
             cada chamada que passa `href` externo: texto visualmente oculto,
             só para quem usa leitor de tela — visualmente o botão já diz
             "Enviar no WhatsApp" sem precisar de sinalização extra. */}
-        {externo && <span className={estilos.somenteLeitor}> (abre em nova aba)</span>}
+        {externo && <span className="sr-only"> (abre em nova aba)</span>}
       </a>
     )
   }

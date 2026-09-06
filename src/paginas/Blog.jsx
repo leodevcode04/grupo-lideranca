@@ -33,7 +33,7 @@ export default function Blog() {
             os <h3> dos cards de `CardPost` terem um <h2> a que se pendurar
             no sumário de títulos (nenhum outro elemento visível serviria de
             título de seção aqui: as pílulas são controles, não título). */}
-        <h2 className={estilos.somenteLeitor}>Publicações</h2>
+        <h2 className="sr-only">Publicações</h2>
 
         {/* Pílulas de filtro — NÃO são abas: não há painel único associado a
             cada pílula, e a grade de posts abaixo não é "controlada" por

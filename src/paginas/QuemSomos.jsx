@@ -52,9 +52,9 @@ export default function QuemSomos() {
         <ol className={estilos.linha}>
           {marcos.map((marco, indice) => (
             <Revelar key={marco.id} as="li" atraso={indice * 90} className={estilos.marco}>
-              <span className={estilos.ano} aria-hidden="true">
+              <time className={estilos.ano} dateTime={marco.ano}>
                 {marco.ano}
-              </span>
+              </time>
               <div className={estilos.marcoConteudo}>
                 <h3 className={estilos.marcoTitulo}>{marco.titulo}</h3>
                 <p className={estilos.marcoTexto}>{marco.texto}</p>

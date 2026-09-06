@@ -157,7 +157,7 @@ export default function Wizard() {
           imprevisível (Tarefa 10, 8.3). A contagem ainda merece existir —
           é o que o campo focado sozinho não consegue dizer — só que uma
           vez por tentativa, não uma vez por tecla. */}
-      <p className={estilos.somenteLeitor} role="status">
+      <p className="sr-only" role="status">
         {mensagemErro}
       </p>
 

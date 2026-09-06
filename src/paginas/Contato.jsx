@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Cabecalho from '../componentes/ui/Cabecalho.jsx'
+import Secao from '../componentes/ui/Secao.jsx'
 import Botao from '../componentes/ui/Botao.jsx'
 import Campo from '../componentes/ui/Campo.jsx'
 import IconeRede from '../componentes/ui/IconeRede.jsx'
@@ -36,6 +37,11 @@ export default function Contato() {
   const [mensagemErro, setMensagemErro] = useState('')
   const formRef = useRef(null)
   const confirmacaoRef = useRef(null)
+  const primeiroCampoRef = useRef(null)
+  // Guarda para o efeito de foco de retorno (abaixo) não disparar na
+  // montagem inicial, quando `enviado` já nasce `false` e não há para onde
+  // "voltar" o foco ainda.
+  const montadoRef = useRef(false)
 
   function mudarCampo(campo, valor) {
     setValores((atual) => ({ ...atual, [campo]: valor }))
@@ -78,6 +84,20 @@ export default function Contato() {
     if (enviado) confirmacaoRef.current?.focus()
   }, [enviado])
 
+  // Devolve o foco para dentro do formulário restaurado (revisão, 8.3): toda
+  // outra transição deste arquivo move o foco (para o campo com erro, ou
+  // para o cartão de confirmação); só "enviar outra mensagem" deixava o foco
+  // cair no `<body>`, porque nada focava o formulário que reaparece. Roda
+  // após o re-render que já trocou o cartão pelo `<form>`, por isso depende
+  // de `enviado` e não é chamado direto em `enviarNovamente`.
+  useEffect(() => {
+    if (!montadoRef.current) {
+      montadoRef.current = true
+      return
+    }
+    if (!enviado) primeiroCampoRef.current?.focus()
+  }, [enviado])
+
   function enviarNovamente() {
     setValores(ESTADO_INICIAL)
     setErros({})
@@ -95,32 +115,43 @@ export default function Contato() {
         foto={FOTO_CONTATO}
       />
 
-      <div className={`container ${estilos.pagina}`}>
+      <Secao
+        id="contato-conteudo"
+        fundo="noite"
+        ar="padrao"
+        etiqueta="Fale com a gente"
+        titulo="Escolha o canal mais fácil para você"
+      >
         <div className={estilos.colunas}>
           <section className={estilos.canais} aria-labelledby="contato-canais-titulo">
-            <h2 id="contato-canais-titulo" className={estilos.tituloColuna}>
+            <h3 id="contato-canais-titulo" className={estilos.tituloColuna}>
               Canais de atendimento
-            </h2>
+            </h3>
 
+            {/* Telefone, WhatsApp e e-mail passam pelo `Botao` (variante "texto")
+                em vez de um `<a>` escrito à mão para cada um (revisão, 8.2): é o
+                `Botao` que já detecta link externo, põe `target`/`rel` e
+                acrescenta o aviso para leitor de tela — uma vez só, corretamente
+                — e a mesma variante já dá 44px de alvo de toque (revisão, 8.1),
+                sem precisar do truque de `::after` esticado aqui. */}
             <ul className={estilos.listaCanais}>
               <li>
                 <span className={estilos.rotuloCanal}>Telefone</span>
-                <a href={contato.telefoneHref} className={estilos.valorCanal}>
+                <Botao href={contato.telefoneHref} variante="texto" className={estilos.valorCanal}>
                   {contato.telefone}
-                </a>
+                </Botao>
               </li>
               <li>
                 <span className={estilos.rotuloCanal}>WhatsApp</span>
-                <a href={HREF_WHATSAPP} className={estilos.valorCanal}>
+                <Botao href={HREF_WHATSAPP} variante="texto" className={estilos.valorCanal}>
                   Enviar mensagem
-                  <span className={estilos.somenteLeitor}> (abre em nova aba)</span>
-                </a>
+                </Botao>
               </li>
               <li>
                 <span className={estilos.rotuloCanal}>E-mail</span>
-                <a href={`mailto:${contato.email}`} className={estilos.valorCanal}>
+                <Botao href={`mailto:${contato.email}`} variante="texto" className={estilos.valorCanal}>
                   {contato.email}
-                </a>
+                </Botao>
               </li>
               <li>
                 <span className={estilos.rotuloCanal}>Endereço</span>
@@ -140,7 +171,7 @@ export default function Contato() {
                     rel="noreferrer"
                   >
                     <IconeRede id={rede.id} />
-                    <span className={estilos.somenteLeitor}>
+                    <span className="sr-only">
                       {rede.rotulo} (abre em nova aba)
                     </span>
                   </a>
@@ -150,19 +181,31 @@ export default function Contato() {
           </section>
 
           <section className={estilos.formularioSecao} aria-labelledby="contato-form-titulo">
-            <h2 id="contato-form-titulo" className={estilos.tituloColuna}>
+            <h3 id="contato-form-titulo" className={estilos.tituloColuna}>
               Envie uma mensagem
-            </h2>
+            </h3>
 
             {enviado ? (
+              // Sem `role="status"` (revisão, 8.8): o movimento de foco para
+              // este elemento já é o sinal de que algo mudou — a mesma
+              // colisão foco+região-viva que a correção 8.3 da Tarefa 10
+              // diagnosticou no wizard.
               <div
                 ref={confirmacaoRef}
                 tabIndex={-1}
-                role="status"
                 className={estilos.confirmacao}
               >
                 <span className={estilos.confirmacaoIcone} aria-hidden="true">
-                  ✓
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path
+                      d="M4 12.5l5 5L20 6.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
                 <p className={estilos.confirmacaoTitulo}>Mensagem "enviada"!</p>
                 <p className={estilos.confirmacaoTexto}>
@@ -175,67 +218,68 @@ export default function Contato() {
               </div>
             ) : (
               <>
-                <p className={estilos.somenteLeitor} aria-live="assertive">
+                <p className="sr-only" aria-live="assertive">
                   {mensagemErro}
                 </p>
                 <form ref={formRef} className={estilos.form} onSubmit={aoSubmeter} noValidate>
-                <Campo
-                  id="contato-nome"
-                  name="name"
-                  autoComplete="name"
-                  rotulo="Nome"
-                  valor={valores.nome}
-                  erro={erros.nome}
-                  onChange={(v) => mudarCampo('nome', v)}
-                />
-                <Campo
-                  id="contato-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  rotulo="E-mail"
-                  valor={valores.email}
-                  erro={erros.email}
-                  onChange={(v) => mudarCampo('email', v)}
-                />
-                <Campo
-                  id="contato-telefone"
-                  name="tel"
-                  type="tel"
-                  autoComplete="tel"
-                  opcional
-                  rotulo="Telefone"
-                  valor={valores.telefone}
-                  erro={erros.telefone}
-                  onChange={(v) => mudarCampo('telefone', v)}
-                />
-                <Campo
-                  id="contato-assunto"
-                  name="assunto"
-                  rotulo="Assunto"
-                  valor={valores.assunto}
-                  erro={erros.assunto}
-                  onChange={(v) => mudarCampo('assunto', v)}
-                />
-                <Campo
-                  id="contato-mensagem"
-                  name="mensagem"
-                  rotulo="Mensagem"
-                  multilinha
-                  linhas={5}
-                  valor={valores.mensagem}
-                  erro={erros.mensagem}
-                  onChange={(v) => mudarCampo('mensagem', v)}
-                />
-                <Botao tipo="submit" variante="primario" className={estilos.enviar}>
-                  Enviar mensagem
-                </Botao>
-              </form>
+                  <Campo
+                    id="contato-nome"
+                    name="name"
+                    autoComplete="name"
+                    rotulo="Nome"
+                    valor={valores.nome}
+                    erro={erros.nome}
+                    onChange={(v) => mudarCampo('nome', v)}
+                    inputRef={primeiroCampoRef}
+                  />
+                  <Campo
+                    id="contato-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    rotulo="E-mail"
+                    valor={valores.email}
+                    erro={erros.email}
+                    onChange={(v) => mudarCampo('email', v)}
+                  />
+                  <Campo
+                    id="contato-telefone"
+                    name="telefone"
+                    type="tel"
+                    autoComplete="tel"
+                    opcional
+                    rotulo="Telefone"
+                    valor={valores.telefone}
+                    erro={erros.telefone}
+                    onChange={(v) => mudarCampo('telefone', v)}
+                  />
+                  <Campo
+                    id="contato-assunto"
+                    name="assunto"
+                    rotulo="Assunto"
+                    valor={valores.assunto}
+                    erro={erros.assunto}
+                    onChange={(v) => mudarCampo('assunto', v)}
+                  />
+                  <Campo
+                    id="contato-mensagem"
+                    name="mensagem"
+                    rotulo="Mensagem"
+                    multilinha
+                    linhas={5}
+                    valor={valores.mensagem}
+                    erro={erros.mensagem}
+                    onChange={(v) => mudarCampo('mensagem', v)}
+                  />
+                  <Botao tipo="submit" variante="primario" className={estilos.enviar}>
+                    Enviar mensagem
+                  </Botao>
+                </form>
               </>
             )}
           </section>
         </div>
-      </div>
+      </Secao>
     </>
   )
 }

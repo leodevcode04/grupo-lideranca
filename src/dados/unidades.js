@@ -1,3 +1,7 @@
+// Fundação em 2017 (ver comentário em numeros.js). A ordem segue a expansão
+// cronológica descrita em quemSomos.js: Tubarão primeiro, depois litoral
+// catarinense, depois Rio Grande do Sul — as unidades adicionadas depois da
+// linha do tempo (Tarefa 13, 8.11) continuam essa mesma direção geográfica.
 export const unidades = [
   {
     id: 1,
@@ -39,6 +43,42 @@ export const unidades = [
   },
   {
     id: 5,
+    cidade: 'Itajaí',
+    uf: 'SC',
+    endereco: 'Av. Marcos Konder, 890 — Centro',
+    telefone: '(47) 3348-6600',
+    telefoneHref: 'tel:+554733486600',
+    matriz: false,
+  },
+  {
+    id: 6,
+    cidade: 'Blumenau',
+    uf: 'SC',
+    endereco: 'R. XV de Novembro, 1140 — Centro',
+    telefone: '(47) 3041-7700',
+    telefoneHref: 'tel:+554730417700',
+    matriz: false,
+  },
+  {
+    id: 7,
+    cidade: 'Joinville',
+    uf: 'SC',
+    endereco: 'R. do Príncipe, 640 — Centro',
+    telefone: '(47) 3422-9930',
+    telefoneHref: 'tel:+554734229930',
+    matriz: false,
+  },
+  {
+    id: 8,
+    cidade: 'Chapecó',
+    uf: 'SC',
+    endereco: 'Av. Getúlio Vargas, 780 — Centro',
+    telefone: '(49) 3323-1850',
+    telefoneHref: 'tel:+554933231850',
+    matriz: false,
+  },
+  {
+    id: 9,
     cidade: 'Porto Alegre',
     uf: 'RS',
     endereco: 'Av. Ipiranga, 6681 — Partenon',
@@ -47,12 +87,30 @@ export const unidades = [
     matriz: false,
   },
   {
-    id: 6,
+    id: 10,
     cidade: 'Caxias do Sul',
     uf: 'RS',
     endereco: 'R. Sinimbu, 1890 — Centro',
     telefone: '(54) 3221-9040',
     telefoneHref: 'tel:+555432219040',
+    matriz: false,
+  },
+  {
+    id: 11,
+    cidade: 'Novo Hamburgo',
+    uf: 'RS',
+    endereco: 'Av. Pedro Adams Filho, 1520 — Centro',
+    telefone: '(51) 3594-2280',
+    telefoneHref: 'tel:+555135942280',
+    matriz: false,
+  },
+  {
+    id: 12,
+    cidade: 'Pelotas',
+    uf: 'RS',
+    endereco: 'R. Andrade Neves, 2010 — Centro',
+    telefone: '(53) 3225-6640',
+    telefoneHref: 'tel:+555332256640',
     matriz: false,
   },
 ]

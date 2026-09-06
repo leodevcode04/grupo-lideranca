@@ -17,5 +17,5 @@ export const marcos = [
   { id: 1, ano: '2017', titulo: 'Fundação em Tubarão', texto: 'O Grupo Liderança nasce com a primeira unidade, atendendo associados da região sul de Santa Catarina.' },
   { id: 2, ano: '2019', titulo: 'Expansão pelo litoral catarinense', texto: 'Novas unidades em Criciúma e Florianópolis levam a proteção veicular a mais associados no estado.' },
   { id: 3, ano: '2022', titulo: 'Chegada ao Rio Grande do Sul', texto: 'A associação passa a atender Porto Alegre e Caxias do Sul, consolidando presença em dois estados.' },
-  { id: 4, ano: '2025', titulo: 'Seis unidades em operação', texto: 'O Grupo Liderança completa nove anos de história com seis unidades e milhares de veículos protegidos.' },
+  { id: 4, ano: '2025', titulo: 'Seis unidades em operação', texto: 'O Grupo Liderança completa oito anos de história com seis unidades e milhares de veículos protegidos.' },
 ]

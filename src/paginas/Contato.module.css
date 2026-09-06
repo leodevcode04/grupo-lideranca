@@ -1,8 +1,3 @@
-.pagina {
-  padding-top: var(--e-6);
-  padding-bottom: var(--e-7);
-}
-
 .colunas {
   display: grid;
   grid-template-columns: 5fr 7fr;
@@ -83,6 +78,7 @@ a.valorCanal {
 }
 
 .iconeRede {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -94,22 +90,18 @@ a.valorCanal {
   transition: color var(--transicao), background-color var(--transicao);
 }
 
+/* Alvo de toque de 44px sem inchar o círculo de 36px (revisão, 8.1): `::after`
+   esticado soma 4px de cada lado (36 + 4 + 4 = 44). */
+.iconeRede::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
 @media (hover: hover) {
   .iconeRede:hover {
     color: var(--dourado);
   }
-}
-
-.somenteLeitor {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 .formularioSecao {

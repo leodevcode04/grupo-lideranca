@@ -101,7 +101,11 @@
   font-size: var(--t-mini);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--gelo-tenue);
+  /* --gelo-tenue mede ~4.40:1 sobre --azul-elevado (o fundo de `.destaque`,
+     acima) — abaixo do mínimo AA de 4.5:1 para texto normal (auditoria da
+     Tarefa 14). --gelo-suave mede ~5.70:1 no mesmo par e é o que o resto
+     deste cartão já usa (`.tituloEtiqueta`, `.nomePlano`, `.porMes`). */
+  color: var(--gelo-suave);
 }
 
 /* Botão "Editar" (revisão, 6.8): usa `irPara` além do uso defensivo do
@@ -140,7 +144,9 @@
 
 .dados dt {
   font-size: var(--t-mini);
-  color: var(--gelo-tenue);
+  /* Mesmo par apertado do `.grupoRotulo` acima — sobre `--azul-elevado`,
+     --gelo-tenue reprova AA (~4.40:1). */
+  color: var(--gelo-suave);
 }
 
 .dados dd {

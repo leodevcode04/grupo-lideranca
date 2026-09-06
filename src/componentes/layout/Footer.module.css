@@ -45,14 +45,31 @@
 .lista {
   display: flex;
   flex-direction: column;
-  gap: var(--e-1);
+  /* e-3 (24px), não e-1: dá respiro suficiente para o alvo de toque de
+     44px do `.link` abaixo se esticar sem sobrepor demais o vizinho
+     (auditoria da Tarefa 14 — mesmo alvo de toque reprovava aqui: texto de
+     13px, ~18px de altura própria, como os telefones de `/unidades` antes
+     da correção 8.1). */
+  gap: var(--e-3);
 }
 
 .link {
+  position: relative;
+  display: inline-block;
   color: var(--gelo-suave);
   text-decoration: none;
   font-size: var(--t-mini);
   transition: color var(--transicao);
+}
+
+/* Alvo de toque real de 44px sem inchar o texto visualmente (mesmo padrão
+   de `/unidades` 8.1 e do `.iconeRede` de `/contato`): a caixa do link
+   continua do tamanho do próprio texto, o `::after` esticado é que estende
+   a área clicável para cima e para baixo. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: -13px 0;
 }
 
 .link:hover {

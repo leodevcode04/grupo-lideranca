@@ -1,0 +1,14 @@
+.logo {
+  display: block;
+  height: 2.5rem;
+  width: auto;
+  /* Em contexto flex/grid o `width: auto` faz a imagem esticar ate a largura
+     da faixa (o rodape esticava para 321px sobre 44px de altura, quase o dobro
+     da proporcao). Alinhar no inicio do eixo transversal preserva o lockup. */
+  align-self: flex-start;
+  max-width: 100%;
+  object-fit: contain;
+  /* O lockup ja vem recortado justo, sem margem interna; a folga otica
+     em volta e responsabilidade do layout que o posiciona. */
+  user-select: none;
+}

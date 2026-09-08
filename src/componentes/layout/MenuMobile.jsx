@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import Botao from '../ui/Botao.jsx'
+import Logo from '../ui/Logo.jsx'
 import estilos from './MenuMobile.module.css'
 
 const SELETOR_FOCAVEL =
@@ -93,9 +94,7 @@ export default function MenuMobile({ aberto, aoFechar, navegacao }) {
           transition={{ duration: semMovimento ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className={estilos.topo}>
-            <span className={estilos.logo}>
-              <span className={estilos.logoDourado}>LIDERANÇA</span>
-            </span>
+            <Logo alt="" className={estilos.marca} />
             <button
               ref={botaoFecharRef}
               type="button"

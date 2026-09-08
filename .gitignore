@@ -20,3 +20,7 @@ pnpm-debug.log*
 .vite/
 
 grupo-lideranca-dist.zip
+
+# Arquivos de marca enviados pelo usuario, antes de otimizar
+marca-originais/
+logos/Recuperado_SEM TÍTULO-1_3.png

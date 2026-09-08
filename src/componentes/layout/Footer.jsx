@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { contato } from '../../dados/contato.js'
 import { navegacao } from '../../dados/navegacao.js'
 import IconeRede from '../ui/IconeRede.jsx'
+import Logo from '../ui/Logo.jsx'
 import estilos from './Footer.module.css'
 
 export default function Footer() {
@@ -11,9 +12,7 @@ export default function Footer() {
     <footer className={estilos.rodape}>
       <div className={`container ${estilos.grade}`}>
         <div className={estilos.coluna}>
-          <p className={estilos.logo}>
-            <span className={estilos.logoDourado}>LIDERANÇA</span>
-          </p>
+          <Logo className={estilos.marca} />
           <p className={estilos.institucional}>
             Associação de proteção veicular com cobertura nacional, assistência 24
             horas e indenização de até 100% da tabela FIPE.

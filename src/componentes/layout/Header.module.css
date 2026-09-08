@@ -47,16 +47,15 @@
 }
 
 .logo {
-  font-family: var(--fonte-titulo);
-  font-size: var(--t-card);
-  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  color: var(--gelo);
-  white-space: nowrap;
+  /* A linha do cabecalho tem 3.25rem; 2.5rem deixa folga otica em cima e
+     embaixo sem que a marca encoste na borda da faixa. */
 }
 
-.logoDourado {
-  color: var(--dourado);
+.marca {
+  height: 2.5rem;
 }
 
 .nav {

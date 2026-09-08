@@ -16,15 +16,8 @@
   gap: var(--e-2);
 }
 
-.logo {
-  font-family: var(--fonte-titulo);
-  font-size: var(--t-card);
-  letter-spacing: 0.04em;
-  color: var(--gelo);
-}
-
-.logoDourado {
-  color: var(--dourado);
+.marca {
+  height: 2.75rem;
 }
 
 .institucional {

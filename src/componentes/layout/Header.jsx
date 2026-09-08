@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import Botao from '../ui/Botao.jsx'
+import Logo from '../ui/Logo.jsx'
 import MenuMobile from './MenuMobile.jsx'
 import { navegacao } from '../../dados/navegacao.js'
 import estilos from './Header.module.css'
@@ -54,8 +55,8 @@ export default function Header() {
       </a>
       <header className={`${estilos.cabecalho} ${rolado ? estilos.rolado : ''}`}>
         <div className={`container ${estilos.linha}`}>
-          <NavLink to="/" className={estilos.logo}>
-            <span className={estilos.logoDourado}>LIDERANÇA</span>
+          <NavLink to="/" className={estilos.logo} aria-label="Grupo Liderança — página inicial">
+            <Logo alt="" className={estilos.marca} />
           </NavLink>
 
           <nav className={estilos.nav} aria-label="Navegação principal">

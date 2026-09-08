@@ -1,0 +1,24 @@
+# Configuracao de build do Netlify.
+#
+# Deixar isto versionado, em vez de digitar na interface, garante que
+# qualquer redeploy (ou um site novo apontando para o mesmo repo) use
+# exatamente os mesmos parametros.
+#
+# O fallback de SPA vive em public/_redirects, nao aqui: aquele arquivo e
+# a fonte unica da regra e e copiado para dist/ pelo proprio Vite.
+
+[build]
+  command = "npm test && npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Local roda Node 24; 22 e a versao estavel mais proxima suportada
+  # pelo Netlify. Vite 6 exige Node 18+.
+  NODE_VERSION = "22"
+
+# Deploy previews e branches: mesmo build, sem tratamento especial.
+[context.deploy-preview]
+  command = "npm test && npm run build"
+
+[context.branch-deploy]
+  command = "npm test && npm run build"

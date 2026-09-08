@@ -18,3 +18,5 @@ yarn-error.log*
 pnpm-debug.log*
 
 .vite/
+
+grupo-lideranca-dist.zip
